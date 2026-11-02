@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, Check, Contrast, HelpCircle, X } from "lucide-react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogTitle,
@@ -177,13 +176,6 @@ export function HowToPlay() {
               {last ? "Play" : "Next"}
             </button>
           </div>
-
-          <DialogClose
-            className="absolute right-4 top-4 rounded-full p-1.5 text-ink-soft hover:text-ink"
-            aria-label="Close"
-          >
-            <X aria-hidden className="size-4" strokeWidth={2.5} />
-          </DialogClose>
         </DialogContent>
       </Dialog>
     </>
