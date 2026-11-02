@@ -51,7 +51,7 @@ export default function LeaderboardPage() {
       </Link>
       <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">
         <span className="sr-only">Scouted leaderboard</span>
-        <span aria-hidden>
+        <span aria-hidden className="group bg-[radial-gradient(85%_160%_at_50%_45%,#ffffff_0%,#ffffff_62%,#f4f7ff_82%,var(--color-ink)_100%)] bg-clip-text transition-[color,text-shadow] duration-500 ease-out hover:text-transparent hover:text-shadow-[0_0_12px_rgba(238,241,248,0.3)]">
           Sc<Ball />uted<span className="text-brand">.</span>
         </span>
       </h1>

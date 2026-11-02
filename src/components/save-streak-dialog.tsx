@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Flame } from "lucide-react";
+import { SILVER } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -73,7 +74,7 @@ export function SaveStreakDialog({
             <button
               type="button"
               onClick={onClose}
-              className="mt-5 h-12 w-full rounded-2xl bg-ink text-sm font-bold text-canvas"
+              className={`${SILVER} mt-5 h-12 w-full rounded-2xl text-sm font-bold text-canvas`}
             >
               Keep playing
             </button>

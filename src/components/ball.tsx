@@ -16,7 +16,7 @@ export function Ball({ className = "" }: { className?: string }) {
       width={256}
       height={256}
       priority
-      className={`inline-block size-[0.56em] translate-y-[0.02em] align-baseline ${className}`}
+      className={`inline-block size-[0.56em] translate-y-[0.02em] align-baseline transition-transform duration-700 ease-out group-hover:rotate-[360deg] motion-reduce:transition-none ${className}`}
     />
   );
 }

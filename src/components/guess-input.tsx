@@ -2,13 +2,13 @@
 
 import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
-import { search, roleLabel, type Player } from "@/lib/game";
+import { search, roleLabel, type GuessOption } from "@/lib/game";
 
 type Props = {
-  players: Player[];
+  players: GuessOption[];
   guessed: Set<number>;
   disabled: boolean;
-  onGuess: (player: Player) => void;
+  onGuess: (player: GuessOption) => void;
 };
 
 export function GuessInput({ players, guessed, disabled, onGuess }: Props) {
@@ -21,7 +21,7 @@ export function GuessInput({ players, guessed, disabled, onGuess }: Props) {
     [players, query, guessed],
   );
 
-  function submit(player: Player | undefined) {
+  function submit(player: GuessOption | undefined) {
     if (!player) return;
     onGuess(player);
     setQuery("");

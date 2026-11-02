@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Copy, Crown, Timer } from "lucide-react";
 import { GuessInput } from "@/components/guess-input";
 import { GuessRow } from "@/components/guess-row";
-import { MAX_GUESSES, isWin, type Player } from "@/lib/game";
+import { compare, isWin, MAX_GUESSES, type GuessOption, type Player } from "@/lib/game";
+import { SILVER } from "@/lib/utils";
 import { playerId } from "@/lib/identity";
 import {
   roundOver,
@@ -157,8 +158,8 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
               {room.code.split("").map((ch, i) => (
                 <span
                   key={i}
-                  className="grid size-14 place-items-center rounded-2xl bg-ink text-3xl
-                             font-black text-white sm:size-16 sm:text-4xl"
+                  className={`${SILVER} grid size-14 place-items-center rounded-2xl text-3xl
+                             font-black text-canvas sm:size-16 sm:text-4xl`}
                 >
                   {ch}
                 </span>
@@ -196,7 +197,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
           </h1>
           <span
             className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold
-                        tabular-nums ${left <= 10 ? "bg-brand text-white" : "bg-ink text-canvas"}`}
+                        tabular-nums ${left <= 10 ? "bg-brand text-white" : `${SILVER} text-canvas`}`}
           >
             <Timer aria-hidden className="size-4" strokeWidth={2.5} />
             {left}s
@@ -294,7 +295,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
       {room.status === "done" && (
         <Link
           href="/rooms"
-          className="mt-4 block h-14 rounded-2xl bg-ink pt-4 text-center text-sm font-bold text-canvas"
+          className={`${SILVER} mt-4 block h-14 rounded-2xl pt-4 text-center text-sm font-bold text-canvas`}
         >
           New room
         </Link>
@@ -307,7 +308,12 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
               players={allPlayers}
               guessed={new Set(guesses.map((g) => g.id))}
               disabled={finished || expired}
-              onGuess={(p) => setGuesses((g) => [...g, p])}
+              // The list offers the trimmed record; the room keeps the full
+              // one, which is what the comparison below needs.
+              onGuess={(p) => {
+                const full = byId.get(p.id);
+                if (full) setGuesses((g) => [...g, full]);
+              }}
             />
             <p className="mt-2 text-xs font-bold text-ink-soft" aria-live="polite">
               {won
@@ -321,7 +327,15 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
           </div>
           <ol className="mt-4 flex flex-col-reverse gap-3">
             {guesses.map((guess, i) => (
-              <GuessRow key={guess.id} guess={guess} target={target} index={i} />
+              // The room holds the answer client-side, so the comparison is
+              // made here rather than inside the row.
+              <GuessRow
+                key={guess.id}
+                guess={guess}
+                cells={compare(guess, target)}
+                correct={isWin(guess, target)}
+                index={i}
+              />
             ))}
           </ol>
         </>

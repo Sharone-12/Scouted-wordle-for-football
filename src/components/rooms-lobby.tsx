@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Ball } from "@/components/ball";
 import { playerId, rememberName, savedName } from "@/lib/identity";
 import { ROUND_CHOICES, SECONDS_CHOICES } from "@/lib/room";
+import { SILVER } from "@/lib/utils";
 
 export function RoomsLobby() {
   const router = useRouter();
@@ -56,7 +57,7 @@ export function RoomsLobby() {
     "h-11 w-full rounded-2xl border-2 border-edge bg-surface px-4 text-base font-semibold " +
     "outline-none placeholder:font-medium placeholder:text-ink-soft/60 focus-visible:border-brand";
   const chip = (on: boolean) =>
-    `rounded-full px-2.5 py-1 text-xs font-bold ${on ? "bg-ink text-canvas" : "bg-surface text-ink-soft border-2 border-edge"}`;
+    `rounded-full px-2.5 py-1 text-xs font-bold ${on ? `${SILVER} text-canvas` : "bg-surface text-ink-soft border-2 border-edge"}`;
 
   return (
     // One screen, no scrolling: `h-dvh` tracks the visible viewport on mobile
@@ -70,7 +71,7 @@ export function RoomsLobby() {
           </Link>
           <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">
             <span className="sr-only">Scouted with friends</span>
-            <span aria-hidden>
+            <span aria-hidden className="group bg-[radial-gradient(85%_160%_at_50%_45%,#ffffff_0%,#ffffff_62%,#f4f7ff_82%,var(--color-ink)_100%)] bg-clip-text transition-[color,text-shadow] duration-500 ease-out hover:text-transparent hover:text-shadow-[0_0_12px_rgba(238,241,248,0.3)]">
               Sc<Ball />uted<span className="text-brand">.</span>
             </span>
           </h1>
@@ -142,8 +143,8 @@ export function RoomsLobby() {
               type="button"
               disabled={busy}
               onClick={join}
-              className="mt-3 h-11 w-full rounded-2xl bg-ink text-sm font-bold text-canvas
-                         hover:bg-ink/90 disabled:opacity-50"
+              className={`${SILVER} mt-3 h-11 w-full rounded-2xl text-sm font-bold text-canvas
+                         hover:brightness-95 disabled:opacity-50`}
             >
               Join
             </button>

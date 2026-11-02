@@ -3,11 +3,11 @@ import { connection } from "next/server";
 import { Ball } from "@/components/ball";
 import { Game } from "@/components/game";
 import data from "@/data/game-players.json";
-import { answerFor, puzzleNumber, type Player } from "@/lib/game";
+import { puzzleNumber, toOption, type Player } from "@/lib/game";
 
-// The whole pool is guessable; only well-known players can be the answer.
-const players = data as Player[];
-const answerPool = players.filter((p) => p.answer);
+// Mapped once at module scope, not per request: this is the list the browser
+// searches, and it is all the browser is told.
+const options = (data as Player[]).map(toOption);
 
 async function DailyGame() {
   // Today's answer depends on the current date, which a prerender is not
@@ -27,8 +27,7 @@ async function DailyGame() {
   });
   return (
     <Game
-      players={players}
-      target={answerFor(answerPool, now)}
+      players={options}
       puzzleNumber={puzzleNumber(now)}
       puzzleDate={puzzleDate}
     />
@@ -44,7 +43,7 @@ export default function Home() {
             {/* The ball replaces a letter, so the heading keeps a plain text
                 name for anything that reads the page aloud. */}
             <span className="sr-only">Scouted.</span>
-            <span aria-hidden>
+            <span aria-hidden className="group bg-[radial-gradient(85%_160%_at_50%_45%,#ffffff_0%,#ffffff_62%,#f4f7ff_82%,var(--color-ink)_100%)] bg-clip-text transition-[color,text-shadow] duration-500 ease-out hover:text-transparent hover:text-shadow-[0_0_12px_rgba(238,241,248,0.3)]">
               Sc<Ball />uted<span className="text-brand">.</span>
             </span>
           </h1>

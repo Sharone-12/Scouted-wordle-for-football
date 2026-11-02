@@ -16,18 +16,15 @@ import { GuessInput } from "@/components/guess-input";
 import { GuessRow } from "@/components/guess-row";
 import { SaveStreakDialog } from "@/components/save-streak-dialog";
 import { HowToPlay } from "@/components/how-to-play";
-import { StatsBar, StreakChip } from "@/components/stats-bar";
-import { MAX_GUESSES, isWin, type Cell, type Mode, type Player } from "@/lib/game";
+import { MAX_GUESSES, type Cell, type GuessOption, type Mode } from "@/lib/game";
+import { SILVER } from "@/lib/utils";
 import { playerId } from "@/lib/identity";
 import {
   EMPTY,
   loadBoard,
   loadStats,
-  recordDaily,
-  recordUnlimited,
   saveBoard,
   saveStats,
-  statsFor,
   type Stats,
 } from "@/lib/stats";
 
@@ -38,29 +35,22 @@ const MODES: { id: Mode; label: string; icon: typeof CalendarDays }[] = [
 
 export function Game({
   players,
-  target: dailyTarget,
   puzzleNumber,
   puzzleDate,
 }: {
-  players: Player[];
-  target: Player;
+  players: GuessOption[];
   puzzleNumber: number;
   puzzleDate: string;
 }) {
-  const answerPool = useMemo(() => players.filter((p) => p.answer), [players]);
-
   const [mode, setMode] = useState<Mode>("daily");
   // Each mode keeps its own board, so switching to practise a few and coming
   // back does not throw away the day's progress.
-  const [boards, setBoards] = useState<Record<Mode, Player[]>>({ daily: [], unlimited: [] });
+  const [boards, setBoards] = useState<Record<Mode, GuessOption[]>>({ daily: [], unlimited: [] });
   const [surrendered, setSurrendered] = useState<Record<Mode, boolean>>({
     daily: false,
     unlimited: false,
   });
   const [confirmingGiveUp, setConfirmingGiveUp] = useState(false);
-  // Picked on the client, never during render: Math.random() in a server
-  // render and again on hydration gives two different players.
-  const [practice, setPractice] = useState<Player | null>(null);
   const [round, setRound] = useState(1);
   const [stats, setStats] = useState<Stats>(EMPTY);
 
@@ -68,35 +58,75 @@ export function Game({
   // access to it, and seeding state from it directly makes the first client
   // render disagree with the HTML it is hydrating.
   const byId = useMemo(() => new Map(players.map((p) => [p.id, p])), [players]);
-  useEffect(() => {
-    setStats(loadStats());
-    const saved = loadBoard(puzzleNumber)
-      .map((id) => byId.get(id))
-      .filter((p): p is Player => !!p);
-    if (saved.length) setBoards((b) => ({ ...b, daily: saved }));
-  }, [puzzleNumber, byId]);
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [lostStreak, setLostStreak] = useState<number | null>(null);
   const [savePrompt, setSavePrompt] = useState<number | null>(null);
 
-  // A verified unlimited run lives on the server: it picks each answer, judges
-  // each guess and counts the streak, so the board is a record of play rather
-  // than a number this browser chose. The answer is never sent here until the
-  // round is over.
+  // Both modes are judged on the server: it holds the answer, says how each
+  // guess compares and — in unlimited — counts the streak, so the board is a
+  // record of play rather than something this browser worked out for itself.
+  // The answer's name arrives only once the round can no longer be played.
   const [runId, setRunId] = useState<string | null>(null);
-  const [runCells, setRunCells] = useState<Record<number, Cell[]>>({});
-  const [runSolvedId, setRunSolvedId] = useState<number | null>(null);
+  const [cells, setCells] = useState<Record<Mode, Record<number, Cell[]>>>({
+    daily: {},
+    unlimited: {},
+  });
+  const [solvedId, setSolvedId] = useState<Record<Mode, number | null>>({
+    daily: null,
+    unlimited: null,
+  });
+  const [reveal, setReveal] = useState<Record<Mode, string | null>>({
+    daily: null,
+    unlimited: null,
+  });
   const [runEnded, setRunEnded] = useState(false);
-  const [reveal, setReveal] = useState<string | null>(null);
   const [runBusy, setRunBusy] = useState(false);
 
   const resetRound = useCallback(() => {
-    setRunCells({});
-    setRunSolvedId(null);
-    setReveal(null);
+    setCells((c) => ({ ...c, unlimited: {} }));
+    setSolvedId((sv) => ({ ...sv, unlimited: null }));
+    setReveal((r) => ({ ...r, unlimited: null }));
     setBoards((b) => ({ ...b, unlimited: [] }));
   }, []);
+
+  /**
+   * The day's board, judged by the server.
+   *
+   * Every guess so far goes up, not just the newest one: the reply then holds
+   * a verdict for each row, which is what rebuilds the board after a reload
+   * without the browser ever being told the answer. Replaying the same list
+   * cannot change the outcome, so this is safe to call on mount.
+   */
+  const judgeDaily = useCallback(async (ids: number[], gaveUp = false) => {
+    const res = await fetch("/api/daily", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ guessIds: ids, gaveUp }),
+    });
+    if (!res.ok) return null;
+    const body = (await res.json()) as {
+      cells: Record<number, Cell[]>;
+      solvedId: number | null;
+      over: boolean;
+      answer: string | null;
+    };
+    setCells((c) => ({ ...c, daily: body.cells }));
+    setSolvedId((sv) => ({ ...sv, daily: body.solvedId }));
+    setReveal((r) => ({ ...r, daily: body.answer }));
+    return body;
+  }, []);
+
+  useEffect(() => {
+    setStats(loadStats());
+    const saved = loadBoard(puzzleNumber)
+      .map((id) => byId.get(id))
+      .filter((p): p is GuessOption => !!p);
+    if (saved.length) {
+      setBoards((b) => ({ ...b, daily: saved }));
+      void judgeDaily(saved.map((p) => p.id));
+    }
+  }, [puzzleNumber, byId, judgeDaily]);
 
   const startRun = useCallback(async () => {
     setRunBusy(true);
@@ -170,20 +200,16 @@ export function Game({
   }, [streak, bestStreak]);
 
   const guesses = boards[mode];
-  const target = mode === "daily" ? dailyTarget : practice;
   const hasSurrendered = surrendered[mode];
 
   const guessed = useMemo(() => new Set(guesses.map((g) => g.id)), [guesses]);
-  const verified = mode === "unlimited";
-  const won = verified
-    ? runSolvedId !== null
-    : !!target && guesses.some((g) => isWin(g, target));
-  const over = verified
-    ? won || runEnded || hasSurrendered
-    : won || hasSurrendered || guesses.length >= MAX_GUESSES;
-  // The answer's name arrives from the server once the round can no longer be
-  // played; in daily the client already holds it.
-  const answerName = verified ? reveal : (target?.name ?? null);
+  const won = solvedId[mode] !== null;
+  const over =
+    mode === "unlimited"
+      ? won || runEnded || hasSurrendered
+      : won || hasSurrendered || guesses.length >= MAX_GUESSES;
+  // Sent by the server once the round can no longer be played, never before.
+  const answerName = reveal[mode];
   const left = MAX_GUESSES - guesses.length;
 
   function selectMode(next: Mode) {
@@ -209,10 +235,14 @@ export function Game({
   async function giveUp() {
     setSurrendered((s) => ({ ...s, [mode]: true }));
     setConfirmingGiveUp(false);
-    if (mode !== "unlimited") return;
+    // Daily has no run to end; the server is asked for the answer instead.
+    if (mode !== "unlimited") {
+      await judgeDaily(guesses.map((g) => g.id), true);
+      return;
+    }
     const body = await runAction("give-up");
     setRunEnded(true);
-    if (body?.answer) setReveal(body.answer);
+    if (body?.answer) setReveal((r) => ({ ...r, unlimited: body.answer }));
     if (streak > 0) {
       setLostStreak(streak);
       setSavePrompt(streak);
@@ -220,7 +250,7 @@ export function Game({
     setStreak(0);
   }
 
-  async function handleGuess(player: Player) {
+  async function handleGuess(player: GuessOption) {
     if (over) return;
 
     if (mode === "unlimited") {
@@ -228,10 +258,10 @@ export function Game({
       setBoards((b) => ({ ...b, unlimited: [...b.unlimited, player] }));
       const body = await runAction("guess", { guessId: player.id });
       if (!body) return;
-      setRunCells((c) => ({ ...c, [player.id]: body.cells }));
-      if (body.answer) setReveal(body.answer);
+      setCells((c) => ({ ...c, unlimited: { ...c.unlimited, [player.id]: body.cells } }));
+      if (body.answer) setReveal((r) => ({ ...r, unlimited: body.answer }));
       if (body.solved) {
-        setRunSolvedId(player.id);
+        setSolvedId((sv) => ({ ...sv, unlimited: player.id }));
         setLostStreak(null);
         setStreak(body.streak);
         setBestStreak((b) => Math.max(b, body.streak));
@@ -246,10 +276,13 @@ export function Game({
       return;
     }
 
-    if (!target) return;
-    const isWinningGuess = isWin(player, target);
-    setBoards((b) => ({ ...b, [mode]: [...b[mode], player] }));
-    void isWinningGuess;
+    const next = [...guesses, player];
+    setBoards((b) => ({ ...b, daily: next }));
+    const ids = next.map((p) => p.id);
+    // Written before the verdict arrives, so a reload mid-request still finds
+    // the guess; the colours come back from the server on mount.
+    saveBoard(puzzleNumber, ids);
+    await judgeDaily(ids);
   }
 
   return (
@@ -260,7 +293,7 @@ export function Game({
             {/* The ball replaces a letter, so the heading keeps a plain text
                 name for anything that reads the page aloud. */}
             <span className="sr-only">Scouted.</span>
-            <span aria-hidden>
+            <span aria-hidden className="group bg-[radial-gradient(85%_160%_at_50%_45%,#ffffff_0%,#ffffff_62%,#f4f7ff_82%,var(--color-ink)_100%)] bg-clip-text transition-[color,text-shadow] duration-500 ease-out hover:text-transparent hover:text-shadow-[0_0_12px_rgba(238,241,248,0.3)]">
               Sc<Ball />uted<span className="text-brand">.</span>
             </span>
           </h1>
@@ -282,7 +315,7 @@ export function Game({
               onClick={() => selectMode(id)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold
                           transition-colors motion-reduce:transition-none ${
-                            mode === id ? "bg-ink text-canvas" : "text-ink-soft hover:text-ink"
+                            mode === id ? `${SILVER} text-canvas` : "text-ink-soft hover:text-ink"
                           }`}
             >
               <Icon aria-hidden className="size-3.5" strokeWidth={2.5} />
@@ -313,7 +346,7 @@ export function Game({
 
       <div className="mb-6 max-w-xl">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-ink px-3 py-1 text-[11px] font-bold text-canvas tabular-nums">
+          <span className={`${SILVER} rounded-full px-3 py-1 text-[11px] font-bold text-canvas tabular-nums`}>
             {mode === "daily" ? `No. ${puzzleNumber}` : `Round ${round}`}
           </span>
           <span className="text-xs font-bold uppercase tracking-[0.1em] text-ink-soft">
@@ -374,15 +407,15 @@ export function Game({
         <GuessInput
           players={players}
           guessed={guessed}
-          disabled={over || (verified ? !runId || runBusy : !target)}
+          disabled={over || (mode === "unlimited" && (!runId || runBusy))}
           onGuess={handleGuess}
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2" aria-live="polite">
-          {over && (verified ? true : !!target) ? (
+          {over ? (
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className={`rounded-full px-3.5 py-1.5 text-xs font-bold
-                            ${won ? "bg-hit text-white" : "bg-ink text-canvas"}`}
+                            ${won ? "bg-hit text-white" : `${SILVER} text-canvas`}`}
               >
                 {won
                   ? `Got it in ${guesses.length}`
@@ -412,7 +445,7 @@ export function Game({
           ) : (
             <>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-ink px-3.5 py-1.5 text-xs font-bold text-canvas tabular-nums">
+                <span className={`${SILVER} rounded-full px-3.5 py-1.5 text-xs font-bold text-canvas tabular-nums`}>
                   {left} left
                 </span>
                 {/* Ten pips: the count is legible at a glance, not just as a number. */}
@@ -428,10 +461,9 @@ export function Game({
                 </span>
               </div>
 
-              {/* A verified run has no client-side target, so gating on one hid
-                  Give up in unlimited entirely. What matters is that there is
-                  something live to give up on. */}
-              {(verified ? !!runId && !runEnded : !!target) && (
+              {/* What matters is that there is something live to give up on,
+                  which in unlimited means a run the server still calls open. */}
+              {(mode === "unlimited" ? !!runId && !runEnded : !over) && (
                 <div className="flex items-center">
                   {confirmingGiveUp ? (
                     <div className="flex items-center gap-1.5 rounded-full border border-brand/30 bg-surface px-2 py-1">
@@ -471,10 +503,7 @@ export function Game({
         </div>
       </div>
 
-      {/* A verified run never hands the client a target, so requiring one here
-          meant unlimited always fell through to the empty state and no guess
-          ever appeared on the board. */}
-      {(guesses.length === 0 && !over) || (!verified && !target) ? (
+      {guesses.length === 0 && !over ? (
         <p
           className="mt-8 rounded-[28px] border-2 border-dashed border-edge bg-surface/50 p-8
                      text-center text-sm font-medium text-ink-soft"
@@ -487,23 +516,11 @@ export function Game({
             <GuessRow
               key={guess.id}
               guess={guess}
-              target={verified ? undefined : (target ?? undefined)}
-              cells={verified ? runCells[guess.id] : undefined}
-              correct={verified ? runSolvedId === guess.id : undefined}
+              cells={cells[mode][guess.id]}
+              correct={solvedId[mode] === guess.id}
               index={i}
             />
           ))}
-          {/* The reveal row needs the answer as a player object, which a
-              verified run never hands over, so there it is a plain line. */}
-          {over && !won && !verified && target && (
-            <GuessRow
-              guess={target}
-              target={target}
-              index={guesses.length}
-              isAnswer
-              statusLabel={hasSurrendered ? "Revealed" : "Missed"}
-            />
-          )}
         </ol>
       )}
 

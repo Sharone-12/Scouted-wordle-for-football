@@ -17,6 +17,30 @@ export type Player = {
   answer: boolean;
 };
 
+/**
+ * What the browser is given about a player.
+ *
+ * The full record carries every attribute the game compares on, which is why
+ * it stayed on the server: shipping all 2894 of them put the numbers behind
+ * each answer — and the `answer` flag marking which players can even be one —
+ * into the page source, and cost 660KB to do it. The browser only has to
+ * search names and draw a row, so it gets the fields that do those two jobs.
+ */
+export type GuessOption = Pick<
+  Player,
+  "id" | "name" | "team" | "teamId" | "leagueId" | "role" | "followers"
+>;
+
+export const toOption = (p: Player): GuessOption => ({
+  id: p.id,
+  name: p.name,
+  team: p.team,
+  teamId: p.teamId,
+  leagueId: p.leagueId,
+  role: p.role,
+  followers: p.followers,
+});
+
 export type CellState = "hit" | "close" | "miss";
 
 export type Cell = {
@@ -216,11 +240,15 @@ export function randomAnswer(pool: Player[], exclude?: Player): Player {
 const fold = (s: string) =>
   s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
 
-export function search(players: Player[], query: string, limit = 8): Player[] {
+export function search<T extends { id: number; name: string; followers: number }>(
+  players: T[],
+  query: string,
+  limit = 8,
+): T[] {
   const q = fold(query.trim());
   if (!q) return [];
-  const starts: Player[] = [];
-  const contains: Player[] = [];
+  const starts: T[] = [];
+  const contains: T[] = [];
   for (const p of players) {
     const name = fold(p.name);
     if (name.startsWith(q)) starts.push(p);
@@ -229,6 +257,6 @@ export function search(players: Player[], query: string, limit = 8): Player[] {
   // Best-known first inside each group. Scanning in name order instead put
   // whichever reserve happened to sort first ahead of the player everyone
   // actually meant — typing "thiago" offered a Castilla teenager.
-  const byFame = (a: Player, b: Player) => b.followers - a.followers;
+  const byFame = (a: T, b: T) => b.followers - a.followers;
   return [...starts.sort(byFame), ...contains.sort(byFame)].slice(0, limit);
 }

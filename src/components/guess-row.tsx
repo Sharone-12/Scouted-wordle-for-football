@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { ArrowDown, ArrowUp, Check, ChevronRight, Contrast, Eye, X } from "lucide-react";
-import { compare, type Cell, type Player } from "@/lib/game";
+import { type Cell, type GuessOption } from "@/lib/game";
 
 // Each result state gets a saturated fill of its own. Colour is never the only
 // signal: every cell also carries an icon, so the board still reads with the
@@ -168,28 +168,20 @@ function CellBox({ cell, badge }: { cell: Cell; badge?: string }) {
 
 export function GuessRow({
   guess,
-  target,
   index,
   isAnswer = false,
   statusLabel,
-  cells: given,
-  correct: givenCorrect,
+  cells = [],
+  correct = false,
 }: {
-  guess: Player;
-  /** Omitted in a verified run, where the browser is not told the answer. */
-  target?: Player;
+  guess: GuessOption;
   index: number;
   isAnswer?: boolean;
   statusLabel?: string;
-  /** Comparison judged by the server, used when `target` is withheld. */
+  /** The verdict on this guess. Whoever holds the answer works it out. */
   cells?: Cell[];
   correct?: boolean;
 }) {
-  // A verified unlimited run is judged server-side, so the row renders the
-  // cells it was handed rather than comparing against an answer the client
-  // was never given.
-  const cells = given ?? (target ? compare(guess, target) : []);
-  const correct = givenCorrect ?? (target ? guess.id === target.id : false);
 
   return (
     <li

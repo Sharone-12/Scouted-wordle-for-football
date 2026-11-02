@@ -1,4 +1,5 @@
 import { Flame, Trophy } from "lucide-react";
+import { SILVER } from "@/lib/utils";
 import type { Mode } from "@/lib/game";
 import { winRate, type ModeStats } from "@/lib/stats";
 
@@ -36,7 +37,7 @@ export function StreakChip({ stats }: { stats: ModeStats }) {
   return (
     <span
       className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold
-                  ${onBest ? "bg-brand text-white" : "bg-ink/80 text-canvas"}`}
+                  ${onBest ? "bg-brand text-white" : `${SILVER} text-canvas`}`}
       title={onBest ? "Your best run yet" : `Best: ${stats.best}`}
     >
       {onBest ? (

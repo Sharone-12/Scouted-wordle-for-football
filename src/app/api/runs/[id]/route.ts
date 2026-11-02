@@ -7,6 +7,15 @@ const players = data as Player[];
 const byId = new Map(players.map((p) => [p.id, p]));
 const answerPool = players.filter((p) => p.answer);
 
+/**
+ * A name used as a LIKE pattern, with the wildcards defanged.
+ *
+ * `ilike("name", userInput)` treats % and _ as wildcards, so the name "a%"
+ * matched somebody else's row and the branch below rewrote their entry. The
+ * only matches wanted here are exact ones, case aside.
+ */
+const likeLiteral = (s: string) => s.replace(/[\\%_]/g, (c) => `\\${c}`);
+
 type Ctx = { params: Promise<{ id: string }> };
 type Run = {
   id: string;
@@ -60,7 +69,10 @@ export async function POST(request: Request, { params }: Ctx) {
     const solved = guess.id === answer.id;
     const outOfGuesses = !solved && guesses >= MAX_GUESSES;
 
-    await db
+    // Conditional on the row this request read: two guesses posted at once
+    // both saw the same streak, and an unguarded update would let each add one.
+    // The second write matches nothing and is told to re-read instead.
+    const { data: moved } = await db
       .from("runs")
       .update({
         guesses,
@@ -69,7 +81,14 @@ export async function POST(request: Request, { params }: Ctx) {
         answer_id: solved ? null : run.answer_id,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id);
+      .eq("id", id)
+      .eq("guesses", run.guesses)
+      .eq("answer_id", run.answer_id)
+      .select("id")
+      .maybeSingle();
+    if (!moved) {
+      return NextResponse.json({ error: "That guess was already counted" }, { status: 409 });
+    }
 
     return NextResponse.json({
       cells: compare(guess, answer),
@@ -90,7 +109,9 @@ export async function POST(request: Request, { params }: Ctx) {
       return NextResponse.json({ error: "Finish this player first" }, { status: 409 });
     }
     const answer = nextAnswer(run.seen_ids);
-    await db
+    // Only the first of two concurrent "next" calls deals a player; the second
+    // would otherwise overwrite answer_id and lose a row from seen_ids.
+    const { data: dealt } = await db
       .from("runs")
       .update({
         answer_id: answer.id,
@@ -98,7 +119,13 @@ export async function POST(request: Request, { params }: Ctx) {
         seen_ids: [...run.seen_ids, answer.id],
         updated_at: new Date().toISOString(),
       })
-      .eq("id", id);
+      .eq("id", id)
+      .is("answer_id", null)
+      .select("id")
+      .maybeSingle();
+    if (!dealt) {
+      return NextResponse.json({ error: "A player is already in play" }, { status: 409 });
+    }
     return NextResponse.json({ ok: true, streak: run.streak, guesses: 0 });
   }
 
@@ -121,12 +148,24 @@ export async function POST(request: Request, { params }: Ctx) {
     if (run.claimed) return NextResponse.json({ ok: true, best: run.streak, changed: false });
     if (run.streak < 1) return NextResponse.json({ error: "Nothing to post" }, { status: 400 });
 
+    // The run is marked claimed before the board is touched, not after: two
+    // claims arriving together would both pass the check above, and marking
+    // last let each of them write. Whoever flips the flag owns the write.
+    const { data: marked } = await db
+      .from("runs")
+      .update({ claimed: true })
+      .eq("id", id)
+      .eq("claimed", false)
+      .select("id")
+      .maybeSingle();
+    if (!marked) return NextResponse.json({ ok: true, best: run.streak, changed: false });
+
     // The streak written here is this table's count, not a number the client
     // sent, so the board records what was actually played.
     const existing = await db
       .from("leaderboard")
       .select("id,streak")
-      .ilike("name", name)
+      .ilike("name", likeLiteral(name))
       .maybeSingle();
 
     let changed = true;
@@ -148,7 +187,6 @@ export async function POST(request: Request, { params }: Ctx) {
       }
     }
 
-    await db.from("runs").update({ claimed: true }).eq("id", id);
     return NextResponse.json({ ok: true, best, changed });
   }
 
