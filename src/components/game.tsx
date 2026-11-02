@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CalendarDays, Flag, Flame, Infinity as InfinityIcon, RotateCw } from "lucide-react";
+import Link from "next/link";
+import {
+  CalendarDays,
+  Flag,
+  Flame,
+  Infinity as InfinityIcon,
+  RotateCw,
+  Trophy,
+  Users,
+} from "lucide-react";
 import { Ball } from "@/components/ball";
 import { GuessInput } from "@/components/guess-input";
 import { GuessRow } from "@/components/guess-row";
@@ -159,6 +168,7 @@ export function Game({
           </p>
         </div>
 
+        <div className="flex flex-wrap items-center gap-2">
         <nav
           aria-label="Game mode"
           className="flex rounded-full border-2 border-ink/12 bg-white p-1"
@@ -179,6 +189,24 @@ export function Game({
             </button>
           ))}
         </nav>
+
+        <Link
+          href="/rooms"
+          className="flex items-center gap-1.5 rounded-full border-2 border-ink/12 bg-white px-4 py-2
+                     text-xs font-bold text-ink-soft hover:text-ink"
+        >
+          <Users aria-hidden className="size-3.5" strokeWidth={2.5} />
+          Friends
+        </Link>
+        <Link
+          href="/leaderboard"
+          className="flex items-center gap-1.5 rounded-full border-2 border-ink/12 bg-white px-4 py-2
+                     text-xs font-bold text-ink-soft hover:text-ink"
+        >
+          <Trophy aria-hidden className="size-3.5" strokeWidth={2.5} />
+          Ranks
+        </Link>
+        </div>
       </header>
 
       <div className="mb-6 max-w-xl">
