@@ -347,15 +347,20 @@ export function Game({
 
       <div className="sticky top-0 z-10 -mx-4 px-4 pb-4 pt-3">
         {/*
-          The blur sits on its own layer, masked so it fades out downwards.
-          Applying it to the container drew a hard-edged rectangle of visibly
-          different texture across the page, and masking the container itself
-          would fade the controls along with it.
+          The blur sits on its own layer, full-bleed and masked so it fades out
+          downwards.
+
+          Two things made this look like a pasted-on rectangle. Applying the
+          blur to the container gave it a hard bottom edge, and confining it to
+          the content column left hard vertical edges with the board sharp
+          outside them and blurred inside. It now spans the viewport, so there
+          are no side edges to see, and masking a separate layer keeps the
+          controls fully opaque rather than fading with it.
         */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 -top-px bottom-0 bg-canvas/70
-                     backdrop-blur-md
+          className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2
+                     bg-canvas/70 backdrop-blur-md
                      [mask-image:linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)]
                      [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)]"
         />

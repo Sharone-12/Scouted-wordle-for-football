@@ -196,6 +196,9 @@
       var(--color-canvas);
     background-attachment: fixed;
     color: var(--color-ink);
+    /* The full-bleed blur strip is one viewport wide inside a centred column,
+       which would otherwise be able to push the page sideways. */
+    overflow-x: hidden;
   }
 }
 
