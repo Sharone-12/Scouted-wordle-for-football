@@ -53,98 +53,109 @@ export function RoomsLobby() {
   }
 
   const field =
-    "h-12 w-full rounded-2xl border-2 border-ink/15 bg-white px-4 text-base font-semibold " +
+    "h-11 w-full rounded-2xl border-2 border-ink/15 bg-white px-4 text-base font-semibold " +
     "outline-none placeholder:font-medium placeholder:text-ink-soft/60 focus-visible:border-brand";
   const chip = (on: boolean) =>
-    `rounded-full px-3 py-1.5 text-xs font-bold ${on ? "bg-ink text-white" : "bg-white text-ink-soft border-2 border-ink/12"}`;
+    `rounded-full px-2.5 py-1 text-xs font-bold ${on ? "bg-ink text-white" : "bg-white text-ink-soft border-2 border-ink/12"}`;
 
   return (
-    <main className="mx-auto w-full max-w-xl px-4 py-10 sm:py-14">
-      <Link href="/" className="text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
-        ← Back
-      </Link>
-      <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">
-        <span className="sr-only">Scouted with friends</span>
-        <span aria-hidden>
-          Sc<Ball />uted<span className="text-brand">.</span>
-        </span>
-      </h1>
-      <p className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-ink-soft">
-        Play with friends
-      </p>
-
-      <label className="mt-8 block">
-        <span className="text-xs font-bold uppercase tracking-[0.1em] text-ink-soft">Your name</span>
-        <input
-          className={`mt-2 ${field}`}
-          value={name}
-          maxLength={24}
-          placeholder="Name"
-          onChange={(e) => setName(e.target.value)}
-        />
-      </label>
-
-      <section className="mt-8 rounded-[28px] border-2 border-ink/12 bg-white p-5">
-        <h2 className="text-lg font-extrabold tracking-tight">Create a room</h2>
-        <div className="mt-4 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="w-16 text-xs font-bold uppercase tracking-[0.1em] text-ink-soft">
-              Rounds
+    // One screen, no scrolling: `h-dvh` tracks the visible viewport on mobile
+    // where the browser chrome comes and goes, and the two cards sit side by
+    // side from the small breakpoint up so nothing falls below the fold.
+    <main className="flex h-dvh flex-col overflow-hidden px-4 py-5">
+      <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center gap-4">
+        <div>
+          <Link href="/" className="text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
+            ← Back
+          </Link>
+          <h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">
+            <span className="sr-only">Scouted with friends</span>
+            <span aria-hidden>
+              Sc<Ball />uted<span className="text-brand">.</span>
             </span>
-            {ROUND_CHOICES.map((r) => (
-              <button key={r} type="button" className={chip(rounds === r)} onClick={() => setRounds(r)}>
-                {r}
-              </button>
-            ))}
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="w-16 text-xs font-bold uppercase tracking-[0.1em] text-ink-soft">
-              Timer
-            </span>
-            {SECONDS_CHOICES.map((s) => (
-              <button key={s} type="button" className={chip(seconds === s)} onClick={() => setSeconds(s)}>
-                {s}s
-              </button>
-            ))}
-          </div>
+          </h1>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
+            Play with friends
+          </p>
         </div>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={create}
-          className="mt-5 h-12 w-full rounded-2xl bg-brand text-sm font-bold text-white
-                     hover:bg-brand-deep disabled:opacity-50"
-        >
-          Create room
-        </button>
-      </section>
 
-      <section className="mt-4 rounded-[28px] border-2 border-ink/12 bg-white p-5">
-        <h2 className="text-lg font-extrabold tracking-tight">Join a room</h2>
-        <input
-          className={`mt-4 ${field} text-center text-2xl font-black uppercase tracking-[0.3em]`}
-          value={code}
-          maxLength={4}
-          placeholder="CODE"
-          onChange={(e) => setCode(e.target.value.toUpperCase())}
-          onKeyDown={(e) => e.key === "Enter" && join()}
-        />
-        <button
-          type="button"
-          disabled={busy}
-          onClick={join}
-          className="mt-4 h-12 w-full rounded-2xl bg-ink text-sm font-bold text-white
-                     hover:bg-ink/90 disabled:opacity-50"
-        >
-          Join
-        </button>
-      </section>
+        <label className="block">
+          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+            Your name
+          </span>
+          <input
+            className={`mt-1.5 ${field}`}
+            value={name}
+            maxLength={24}
+            placeholder="Name"
+            onChange={(e) => setName(e.target.value)}
+          />
+        </label>
 
-      {error && (
-        <p role="alert" className="mt-4 text-sm font-bold text-brand-deep">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <section className="rounded-3xl border-2 border-ink/12 bg-white p-4">
+            <h2 className="text-base font-extrabold tracking-tight">Create a room</h2>
+            <div className="mt-3 space-y-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="w-14 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+                  Rounds
+                </span>
+                {ROUND_CHOICES.map((r) => (
+                  <button key={r} type="button" className={chip(rounds === r)} onClick={() => setRounds(r)}>
+                    {r}
+                  </button>
+                ))}
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="w-14 text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+                  Timer
+                </span>
+                {SECONDS_CHOICES.map((sec) => (
+                  <button key={sec} type="button" className={chip(seconds === sec)} onClick={() => setSeconds(sec)}>
+                    {sec}s
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={create}
+              className="mt-4 h-11 w-full rounded-2xl bg-brand text-sm font-bold text-white
+                         hover:bg-brand-deep disabled:opacity-50"
+            >
+              Create room
+            </button>
+          </section>
+
+          <section className="rounded-3xl border-2 border-ink/12 bg-white p-4">
+            <h2 className="text-base font-extrabold tracking-tight">Join a room</h2>
+            <input
+              className={`mt-3 ${field} text-center text-xl font-black uppercase tracking-[0.3em]`}
+              value={code}
+              maxLength={4}
+              placeholder="CODE"
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              onKeyDown={(e) => e.key === "Enter" && join()}
+            />
+            <button
+              type="button"
+              disabled={busy}
+              onClick={join}
+              className="mt-3 h-11 w-full rounded-2xl bg-ink text-sm font-bold text-white
+                         hover:bg-ink/90 disabled:opacity-50"
+            >
+              Join
+            </button>
+          </section>
+        </div>
+
+        {/* Reserved rather than conditional, so an error appearing does not
+            shift the cards and push something off a short screen. */}
+        <p role="alert" className="min-h-5 text-sm font-bold text-brand-deep">
           {error}
         </p>
-      )}
+      </div>
     </main>
   );
 }
