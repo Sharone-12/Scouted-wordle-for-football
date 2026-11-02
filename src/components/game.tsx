@@ -14,6 +14,7 @@ import {
 import { Ball } from "@/components/ball";
 import { GuessInput } from "@/components/guess-input";
 import { GuessRow } from "@/components/guess-row";
+import { HowToPlay } from "@/components/how-to-play";
 import { StatsBar, StreakChip } from "@/components/stats-bar";
 import { MAX_GUESSES, isWin, randomAnswer, type Mode, type Player } from "@/lib/game";
 import {
@@ -206,6 +207,7 @@ export function Game({
           <Trophy aria-hidden className="size-3.5" strokeWidth={2.5} />
           Ranks
         </Link>
+        <HowToPlay />
         </div>
       </header>
 
