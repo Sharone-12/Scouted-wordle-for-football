@@ -118,90 +118,172 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
     );
   }
   if (!room) {
-    return <main className="mx-auto max-w-xl px-4 py-14 text-sm font-medium text-ink-soft">Loading room…</main>;
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-14 text-sm font-medium text-ink-soft">
+        Loading room…
+      </main>
+    );
   }
 
   const isHost = me === room.host_id;
   const table = standings(players, results);
+  const answeredThisRound = new Set(
+    results.filter((r) => r.round === room.current_round).map((r) => r.player_id),
+  );
 
   return (
-    <main className="mx-auto w-full max-w-3xl px-4 py-10 sm:py-14">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <Link href="/" className="text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
-            ← Scouted
-          </Link>
-          <div className="mt-1 flex items-center gap-2">
-            <h1 className="text-3xl font-black tracking-tight tabular-nums">{room.code}</h1>
-            <button
-              type="button"
-              title="Copy the room code"
-              onClick={() => navigator.clipboard?.writeText(room.code)}
-              className="rounded-full border-2 border-ink/12 bg-white p-1.5 text-ink-soft hover:text-ink"
-            >
-              <Copy aria-hidden className="size-3.5" strokeWidth={2.5} />
-              <span className="sr-only">Copy room code</span>
-            </button>
+    <main className="mx-auto w-full max-w-3xl px-4 py-8 sm:py-12">
+      <Link href="/" className="text-xs font-bold uppercase tracking-[0.18em] text-ink-soft">
+        ← Scouted
+      </Link>
+
+      {/* Lobby: the code is the whole job of this screen, so it gets a pane of
+          its own at a size that can be read across a room or off a photo. */}
+      {room.status === "lobby" && (
+        <section className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
+          <div className="rounded-[28px] border-2 border-ink/12 bg-white p-6">
+            <h1 className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+              Room code
+            </h1>
+            <div className="mt-3 flex items-center gap-2">
+              {room.code.split("").map((ch, i) => (
+                <span
+                  key={i}
+                  className="grid size-14 place-items-center rounded-2xl bg-ink text-3xl
+                             font-black text-white sm:size-16 sm:text-4xl"
+                >
+                  {ch}
+                </span>
+              ))}
+              <button
+                type="button"
+                title="Copy the room code"
+                onClick={() => navigator.clipboard?.writeText(room.code)}
+                className="ml-1 rounded-full border-2 border-ink/12 bg-white p-2.5 text-ink-soft
+                           hover:text-ink"
+              >
+                <Copy aria-hidden className="size-4" strokeWidth={2.5} />
+                <span className="sr-only">Copy room code</span>
+              </button>
+            </div>
+            <p className="mt-3 text-sm font-medium text-ink-soft">
+              Send this to anyone you want in the game.
+            </p>
           </div>
-        </div>
-        {room.status === "playing" && (
+
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-1">
+            <Tile label="Rounds" value={room.rounds} />
+            <Tile label="Per round" value={`${room.round_seconds}s`} />
+            <Tile label="Players" value={players.length} />
+          </div>
+        </section>
+      )}
+
+      {/* Playing: the clock is what matters, so it takes the top. */}
+      {room.status === "playing" && (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-black tracking-tight tabular-nums">
+            Round {room.current_round}
+            <span className="text-ink-soft">/{room.rounds}</span>
+          </h1>
           <span
-            className={`flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-bold text-white tabular-nums
-                        ${left <= 10 ? "bg-brand" : "bg-ink"}`}
+            className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold
+                        text-white tabular-nums ${left <= 10 ? "bg-brand" : "bg-ink"}`}
           >
-            <Timer aria-hidden className="size-3.5" strokeWidth={2.5} />
-            {left}s · round {room.current_round}/{room.rounds}
+            <Timer aria-hidden className="size-4" strokeWidth={2.5} />
+            {left}s
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
-      <section className="mt-6 rounded-[28px] border-2 border-ink/12 bg-white p-5">
-        <h2 className="text-xs font-bold uppercase tracking-[0.1em] text-ink-soft">
-          {room.status === "done" ? "Final standings" : `Players (${players.length})`}
+      {room.status === "done" && (
+        <h1 className="mt-3 text-3xl font-black tracking-tight sm:text-4xl">Final standings</h1>
+      )}
+
+      {/* Every player gets a card rather than a list row. */}
+      <section className="mt-4">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">
+          {room.status === "done" ? "Results" : `Players (${players.length})`}
         </h2>
-        <ol className="mt-3 space-y-1.5">
-          {table.map((row) => (
-            <li key={row.player_id} className="flex items-center gap-3 text-sm font-bold">
-              <span className="w-5 text-right tabular-nums text-ink-soft">
-                {room.status === "done" ? row.rank : "·"}
-              </span>
-              {row.player_id === room.host_id && (
-                <Crown aria-hidden className="size-3.5 text-close" strokeWidth={2.5} />
-              )}
-              <span className={row.player_id === me ? "text-brand" : ""}>{row.name}</span>
-              <span className="ml-auto tabular-nums">{row.score}</span>
-            </li>
-          ))}
+        <ol className="mt-2 grid gap-2 sm:grid-cols-2">
+          {table.map((row) => {
+            const isMe = row.player_id === me;
+            const answered = answeredThisRound.has(row.player_id);
+            const podium = room.status === "done" && row.rank === 1;
+            return (
+              <li
+                key={row.player_id}
+                className={`flex items-center gap-3 rounded-3xl border-2 p-3
+                            ${podium ? "border-hit bg-hit-soft" : "border-ink/12 bg-white"}`}
+              >
+                <span
+                  className={`grid size-10 shrink-0 place-items-center rounded-2xl text-sm font-black
+                              ${isMe ? "bg-brand text-white" : "bg-canvas-deep text-ink"}`}
+                  aria-hidden
+                >
+                  {row.name.slice(0, 1).toUpperCase()}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-1.5">
+                    <span className="truncate font-bold">{row.name}</span>
+                    {row.player_id === room.host_id && (
+                      <Crown aria-hidden className="size-3.5 shrink-0 text-close" strokeWidth={2.5} />
+                    )}
+                    {isMe && (
+                      <span className="shrink-0 text-[10px] font-bold uppercase tracking-[0.08em] text-brand">
+                        you
+                      </span>
+                    )}
+                  </span>
+                  <span className="block text-[11px] font-bold uppercase tracking-[0.08em] text-ink-soft">
+                    {room.status === "lobby"
+                      ? "Ready"
+                      : room.status === "done"
+                        ? `${row.solved} solved · rank ${row.rank}`
+                        : answered
+                          ? "Answered"
+                          : "Playing…"}
+                  </span>
+                </span>
+                <span className="text-xl font-black tabular-nums">{row.score}</span>
+              </li>
+            );
+          })}
         </ol>
+      </section>
 
-        {room.status === "lobby" &&
-          (isHost ? (
+      {room.status === "lobby" && (
+        <div className="mt-4">
+          {isHost ? (
             <button
               type="button"
               onClick={() => post({ action: "start" })}
-              className="mt-5 h-12 w-full rounded-2xl bg-brand text-sm font-bold text-white hover:bg-brand-deep"
+              className="h-14 w-full rounded-2xl bg-brand text-sm font-bold text-white
+                         hover:bg-brand-deep"
             >
               Start {room.rounds} rounds · {room.round_seconds}s each
             </button>
           ) : (
-            <p className="mt-5 text-sm font-medium text-ink-soft">
-              Waiting for the host to start. Share the code <strong>{room.code}</strong>.
+            <p className="rounded-3xl border-2 border-dashed border-ink/15 bg-white/50 p-5
+                          text-center text-sm font-medium text-ink-soft">
+              Waiting for the host to start.
             </p>
-          ))}
+          )}
+        </div>
+      )}
 
-        {room.status === "done" && (
-          <Link
-            href="/rooms"
-            className="mt-5 block h-12 rounded-2xl bg-ink pt-3.5 text-center text-sm font-bold text-white"
-          >
-            New room
-          </Link>
-        )}
-      </section>
+      {room.status === "done" && (
+        <Link
+          href="/rooms"
+          className="mt-4 block h-14 rounded-2xl bg-ink pt-4 text-center text-sm font-bold text-white"
+        >
+          New room
+        </Link>
+      )}
 
       {room.status === "playing" && target && (
         <>
-          <div className="mt-6">
+          <div className="mt-5">
             <GuessInput
               players={allPlayers}
               guessed={new Set(guesses.map((g) => g.id))}
@@ -226,5 +308,17 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
         </>
       )}
     </main>
+  );
+}
+
+function Tile({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-ink/12
+                    bg-white px-4 py-3 sm:min-w-28">
+      <span className="text-2xl font-black tabular-nums leading-none">{value}</span>
+      <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-soft">
+        {label}
+      </span>
+    </div>
   );
 }
