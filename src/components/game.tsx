@@ -14,6 +14,7 @@ import {
 import { Ball } from "@/components/ball";
 import { GuessInput } from "@/components/guess-input";
 import { GuessRow } from "@/components/guess-row";
+import { SaveStreakDialog } from "@/components/save-streak-dialog";
 import { HowToPlay } from "@/components/how-to-play";
 import { StatsBar, StreakChip } from "@/components/stats-bar";
 import { MAX_GUESSES, isWin, randomAnswer, type Mode, type Player } from "@/lib/game";
@@ -76,6 +77,7 @@ export function Game({
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
   const [lostStreak, setLostStreak] = useState<number | null>(null);
+  const [savePrompt, setSavePrompt] = useState<number | null>(null);
 
   // Safe client-side hydration for localStorage
   useEffect(() => {
@@ -98,6 +100,26 @@ export function Game({
       localStorage.setItem("scouted_unlimited_best_streak", String(bestStreak));
     } catch {}
   }, [bestStreak]);
+
+  // `scouted:stats` is what the leaderboard and the stats bar read. Without
+  // this the board showed a ten-run while that store still said zero.
+  useEffect(() => {
+    if (!bestStreak && !streak) return;
+    setStats((prev) => {
+      const unlimited = prev.unlimited;
+      if (unlimited.current === streak && unlimited.best >= bestStreak) return prev;
+      const next = {
+        ...prev,
+        unlimited: {
+          ...unlimited,
+          current: streak,
+          best: Math.max(unlimited.best, bestStreak),
+        },
+      };
+      saveStats(next);
+      return next;
+    });
+  }, [streak, bestStreak]);
 
   const guesses = boards[mode];
   const target = mode === "daily" ? dailyTarget : practice;
@@ -127,7 +149,10 @@ export function Game({
     setSurrendered((s) => ({ ...s, [mode]: true }));
     setConfirmingGiveUp(false);
     if (mode === "unlimited") {
-      if (streak > 0) setLostStreak(streak);
+      if (streak > 0) {
+        setLostStreak(streak);
+        setSavePrompt(streak);
+      }
       setStreak(0);
     }
   }
@@ -146,7 +171,10 @@ export function Game({
           return next;
         });
       } else if (guesses.length + 1 >= MAX_GUESSES) {
-        if (streak > 0) setLostStreak(streak);
+        if (streak > 0) {
+          setLostStreak(streak);
+          setSavePrompt(streak);
+        }
         setStreak(0);
       }
     }
@@ -365,6 +393,11 @@ export function Game({
           )}
         </ol>
       )}
+
+      {/* Offered the moment a run ends, which is the only moment the number
+          matters. A ten-run went unrecorded because saving it meant finding
+          the leaderboard page on your own afterwards. */}
+      <SaveStreakDialog streak={savePrompt} onClose={() => setSavePrompt(null)} />
     </main>
   );
 }

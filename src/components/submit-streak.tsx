@@ -15,7 +15,16 @@ export function SubmitStreak() {
 
   useEffect(() => {
     setName(savedName());
-    setBest(loadStats().unlimited.best);
+    // Two stores have held this number at different times, so the higher of
+    // the pair is the honest answer rather than whichever one happens to be
+    // read first.
+    let legacy = 0;
+    try {
+      legacy = Number(localStorage.getItem("scouted_unlimited_best_streak")) || 0;
+    } catch {
+      /* storage unavailable */
+    }
+    setBest(Math.max(loadStats().unlimited.best, legacy));
   }, []);
 
   if (best < 1) {
