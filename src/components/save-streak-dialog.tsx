@@ -8,7 +8,7 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { rememberName, savedName } from "@/lib/identity";
+import { playerId, rememberName, savedName } from "@/lib/identity";
 
 /**
  * Offered the moment an unlimited run ends, because that is the only moment
@@ -17,9 +17,12 @@ import { rememberName, savedName } from "@/lib/identity";
  */
 export function SaveStreakDialog({
   streak,
+  runId,
   onClose,
 }: {
   streak: number | null;
+  /** The finished run to claim. Without one there is nothing verified to post. */
+  runId: string | null;
   onClose: () => void;
 }) {
   const [name, setName] = useState("");
@@ -39,10 +42,12 @@ export function SaveStreakDialog({
     setState("sending");
     setError("");
     rememberName(name.trim());
-    const res = await fetch("/api/leaderboard", {
+    // The streak is not sent: the server posts the figure it counted while
+    // judging this run, so the board cannot be told a number.
+    const res = await fetch(`/api/runs/${runId}`, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), streak }),
+      body: JSON.stringify({ action: "claim", playerId: playerId(), name: name.trim() }),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -53,7 +58,7 @@ export function SaveStreakDialog({
   }
 
   return (
-    <Dialog open={streak !== null} onOpenChange={(next) => !next && onClose()}>
+    <Dialog open={streak !== null && !!runId} onOpenChange={(next) => !next && onClose()}>
       <DialogContent className="max-w-sm rounded-[28px] border-2 border-ink/12 bg-white p-6">
         <DialogTitle className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
           <Flame aria-hidden className="size-5 text-brand" strokeWidth={2.5} />

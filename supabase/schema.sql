@@ -93,3 +93,30 @@ end $$;
 -- posting repeatedly fills the whole top 20 and the board stops being a
 -- ranking of players.
 create unique index if not exists leaderboard_name_key on leaderboard (lower(name));
+
+-- Server-owned unlimited runs.
+--
+-- A streak posted by the browser is just a number the browser chose, so the
+-- leaderboard cannot trust it. Here the server picks each answer, judges each
+-- guess and counts the streak itself; the only way onto the board is to have
+-- actually played. The client never learns the answer until the round is over.
+create table if not exists runs (
+  id         uuid primary key default gen_random_uuid(),
+  player_id  text not null,
+  streak     int  not null default 0,
+  answer_id  int,
+  guesses    int  not null default 0,
+  -- Players already beaten in this run, so the same answer cannot repeat.
+  seen_ids   jsonb not null default '[]'::jsonb,
+  status     text not null default 'active',   -- active | ended
+  claimed    boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists runs_player_idx on runs (player_id, created_at desc);
+
+-- No read policy: the answer lives in this table, so the public key must not
+-- be able to select from it at all. Everything goes through the route
+-- handlers, which use the service role.
+alter table runs enable row level security;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   CalendarDays,
@@ -17,7 +17,8 @@ import { GuessRow } from "@/components/guess-row";
 import { SaveStreakDialog } from "@/components/save-streak-dialog";
 import { HowToPlay } from "@/components/how-to-play";
 import { StatsBar, StreakChip } from "@/components/stats-bar";
-import { MAX_GUESSES, isWin, randomAnswer, type Mode, type Player } from "@/lib/game";
+import { MAX_GUESSES, isWin, type Cell, type Mode, type Player } from "@/lib/game";
+import { playerId } from "@/lib/identity";
 import {
   EMPTY,
   loadBoard,
@@ -79,6 +80,53 @@ export function Game({
   const [lostStreak, setLostStreak] = useState<number | null>(null);
   const [savePrompt, setSavePrompt] = useState<number | null>(null);
 
+  // A verified unlimited run lives on the server: it picks each answer, judges
+  // each guess and counts the streak, so the board is a record of play rather
+  // than a number this browser chose. The answer is never sent here until the
+  // round is over.
+  const [runId, setRunId] = useState<string | null>(null);
+  const [runCells, setRunCells] = useState<Record<number, Cell[]>>({});
+  const [runSolvedId, setRunSolvedId] = useState<number | null>(null);
+  const [runEnded, setRunEnded] = useState(false);
+  const [reveal, setReveal] = useState<string | null>(null);
+  const [runBusy, setRunBusy] = useState(false);
+
+  const resetRound = useCallback(() => {
+    setRunCells({});
+    setRunSolvedId(null);
+    setReveal(null);
+    setBoards((b) => ({ ...b, unlimited: [] }));
+  }, []);
+
+  const startRun = useCallback(async () => {
+    setRunBusy(true);
+    const res = await fetch("/api/runs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ playerId: playerId() }),
+    });
+    setRunBusy(false);
+    if (!res.ok) return;
+    const body = await res.json();
+    setRunId(body.runId);
+    setRunEnded(false);
+    setStreak(0);
+    resetRound();
+  }, [resetRound]);
+
+  const runAction = useCallback(
+    async (action: string, extra: Record<string, unknown> = {}) => {
+      if (!runId) return null;
+      const res = await fetch(`/api/runs/${runId}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action, playerId: playerId(), ...extra }),
+      });
+      return res.ok ? await res.json() : null;
+    },
+    [runId],
+  );
+
   // Safe client-side hydration for localStorage
   useEffect(() => {
     try {
@@ -126,58 +174,82 @@ export function Game({
   const hasSurrendered = surrendered[mode];
 
   const guessed = useMemo(() => new Set(guesses.map((g) => g.id)), [guesses]);
-  const won = !!target && guesses.some((g) => isWin(g, target));
-  const over = won || hasSurrendered || guesses.length >= MAX_GUESSES;
+  const verified = mode === "unlimited";
+  const won = verified
+    ? runSolvedId !== null
+    : !!target && guesses.some((g) => isWin(g, target));
+  const over = verified
+    ? won || runEnded || hasSurrendered
+    : won || hasSurrendered || guesses.length >= MAX_GUESSES;
+  // The answer's name arrives from the server once the round can no longer be
+  // played; in daily the client already holds it.
+  const answerName = verified ? reveal : (target?.name ?? null);
   const left = MAX_GUESSES - guesses.length;
 
   function selectMode(next: Mode) {
     setMode(next);
     setConfirmingGiveUp(false);
-    if (next === "unlimited" && !practice) setPractice(randomAnswer(answerPool));
+    if (next === "unlimited" && !runId && !runBusy) void startRun();
   }
 
-  function nextPlayer() {
-    setPractice((prev) => randomAnswer(answerPool, prev ?? undefined));
-    setBoards((b) => ({ ...b, unlimited: [] }));
+  async function nextPlayer() {
     setSurrendered((s) => ({ ...s, unlimited: false }));
     setConfirmingGiveUp(false);
     setLostStreak(null);
     setRound((r) => r + 1);
+    // A finished run cannot continue, so a new one is started instead.
+    if (runEnded || !runId) {
+      await startRun();
+      return;
+    }
+    resetRound();
+    await runAction("next");
   }
 
-  function giveUp() {
+  async function giveUp() {
     setSurrendered((s) => ({ ...s, [mode]: true }));
     setConfirmingGiveUp(false);
-    if (mode === "unlimited") {
-      if (streak > 0) {
-        setLostStreak(streak);
-        setSavePrompt(streak);
-      }
-      setStreak(0);
+    if (mode !== "unlimited") return;
+    const body = await runAction("give-up");
+    setRunEnded(true);
+    if (body?.answer) setReveal(body.answer);
+    if (streak > 0) {
+      setLostStreak(streak);
+      setSavePrompt(streak);
     }
+    setStreak(0);
   }
 
-  function handleGuess(player: Player) {
-    if (over || !target) return;
-    const isWinningGuess = isWin(player, target);
-    setBoards((b) => ({ ...b, [mode]: [...b[mode], player] }));
+  async function handleGuess(player: Player) {
+    if (over) return;
 
     if (mode === "unlimited") {
-      if (isWinningGuess) {
+      if (!runId) return;
+      setBoards((b) => ({ ...b, unlimited: [...b.unlimited, player] }));
+      const body = await runAction("guess", { guessId: player.id });
+      if (!body) return;
+      setRunCells((c) => ({ ...c, [player.id]: body.cells }));
+      if (body.answer) setReveal(body.answer);
+      if (body.solved) {
+        setRunSolvedId(player.id);
         setLostStreak(null);
-        setStreak((prev) => {
-          const next = prev + 1;
-          setBestStreak((b) => Math.max(b, next));
-          return next;
-        });
-      } else if (guesses.length + 1 >= MAX_GUESSES) {
+        setStreak(body.streak);
+        setBestStreak((b) => Math.max(b, body.streak));
+      } else if (body.over) {
+        setRunEnded(true);
         if (streak > 0) {
           setLostStreak(streak);
           setSavePrompt(streak);
         }
         setStreak(0);
       }
+      return;
     }
+
+    if (!target) return;
+    const isWinningGuess = isWin(player, target);
+    setBoards((b) => ({ ...b, [mode]: [...b[mode], player] }));
+    void isWinningGuess;
   }
 
   return (
@@ -277,11 +349,11 @@ export function Game({
         <GuessInput
           players={players}
           guessed={guessed}
-          disabled={over || !target}
+          disabled={over || (verified ? !runId || runBusy : !target)}
           onGuess={handleGuess}
         />
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2" aria-live="polite">
-          {over && target ? (
+          {over && (verified ? true : !!target) ? (
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className={`rounded-full px-3.5 py-1.5 text-xs font-bold text-white
@@ -292,7 +364,7 @@ export function Game({
                   : hasSurrendered
                     ? "Gave up"
                     : "Out of guesses"}{" "}
-                — it was {target.name}
+                — it was {answerName ?? "…"}
                 {mode === "unlimited" && (
                   <>
                     {won && ` · Streak: ${streak} 🔥`}
@@ -380,9 +452,18 @@ export function Game({
       ) : (
         <ol className="mt-4 flex flex-col-reverse gap-3">
           {guesses.map((guess, i) => (
-            <GuessRow key={guess.id} guess={guess} target={target} index={i} />
+            <GuessRow
+              key={guess.id}
+              guess={guess}
+              target={verified ? undefined : target}
+              cells={verified ? runCells[guess.id] : undefined}
+              correct={verified ? runSolvedId === guess.id : undefined}
+              index={i}
+            />
           ))}
-          {over && !won && target && (
+          {/* The reveal row needs the answer as a player object, which a
+              verified run never hands over, so there it is a plain line. */}
+          {over && !won && !verified && target && (
             <GuessRow
               guess={target}
               target={target}
@@ -397,7 +478,11 @@ export function Game({
       {/* Offered the moment a run ends, which is the only moment the number
           matters. A ten-run went unrecorded because saving it meant finding
           the leaderboard page on your own afterwards. */}
-      <SaveStreakDialog streak={savePrompt} onClose={() => setSavePrompt(null)} />
+      <SaveStreakDialog
+        streak={savePrompt}
+        runId={runId}
+        onClose={() => setSavePrompt(null)}
+      />
     </main>
   );
 }

@@ -172,15 +172,24 @@ export function GuessRow({
   index,
   isAnswer = false,
   statusLabel,
+  cells: given,
+  correct: givenCorrect,
 }: {
   guess: Player;
-  target: Player;
+  /** Omitted in a verified run, where the browser is not told the answer. */
+  target?: Player;
   index: number;
   isAnswer?: boolean;
   statusLabel?: string;
+  /** Comparison judged by the server, used when `target` is withheld. */
+  cells?: Cell[];
+  correct?: boolean;
 }) {
-  const cells = compare(guess, target);
-  const correct = guess.id === target.id;
+  // A verified unlimited run is judged server-side, so the row renders the
+  // cells it was handed rather than comparing against an answer the client
+  // was never given.
+  const cells = given ?? (target ? compare(guess, target) : []);
+  const correct = givenCorrect ?? (target ? guess.id === target.id : false);
 
   return (
     <li
