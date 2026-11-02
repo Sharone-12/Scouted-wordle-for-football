@@ -356,11 +356,17 @@ export function Game({
           at the source — the strip is indistinguishable from the page, so the
           only visible boundary is the soft bottom fade. Masking a separate
           layer keeps the controls fully opaque rather than fading with it.
+
+          It is centred with a negative offset rather than `-translate-x-1/2`:
+          a transform creates a containing block for fixed-attachment
+          backgrounds, which made the scrim's gradient render relative to
+          itself instead of the viewport and show up as a lighter band — a
+          worse seam than the one it replaced.
         */}
         <div
           aria-hidden
-          className="page-scrim pointer-events-none absolute inset-y-0 left-1/2 w-screen
-                     -translate-x-1/2
+          className="page-scrim pointer-events-none absolute inset-y-0 left-[calc(50%-50vw)]
+                     w-[100vw]
                      [mask-image:linear-gradient(to_bottom,black_0%,black_62%,transparent_100%)]
                      [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_62%,transparent_100%)]"
         />
