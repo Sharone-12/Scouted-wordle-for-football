@@ -100,11 +100,19 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
 
   // Advance when the round is genuinely over. The server checks this too, so
   // several clients asking at once cannot skip a round.
+  //
+  // The request is fired once per round and deliberately not cleaned up: this
+  // effect re-runs every time the clock ticks, and a `clearTimeout` cleanup
+  // cancelled the pending call every 500ms, so the 1.2s timer never fired and
+  // the game sat on a finished round forever.
+  const advanced = useRef<string | null>(null);
   useEffect(() => {
     if (!room || room.status !== "playing") return;
     if (!roundOver(room, players, results, now)) return;
-    const id = setTimeout(() => post({ action: "next" }), 1200);
-    return () => clearTimeout(id);
+    const key = `${room.code}:${room.current_round}`;
+    if (advanced.current === key) return;
+    advanced.current = key;
+    setTimeout(() => post({ action: "next" }), 1200);
   }, [room, players, results, now, post]);
 
   if (error) {
