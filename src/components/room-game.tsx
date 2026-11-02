@@ -149,7 +149,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
           its own at a size that can be read across a room or off a photo. */}
       {room.status === "lobby" && (
         <section className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto]">
-          <div className="rounded-[28px] border-2 border-ink/12 bg-white p-6">
+          <div className="rounded-[28px] border-2 border-edge bg-surface p-6">
             <h1 className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">
               Room code
             </h1>
@@ -167,7 +167,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
                 type="button"
                 title="Copy the room code"
                 onClick={() => navigator.clipboard?.writeText(room.code)}
-                className="ml-1 rounded-full border-2 border-ink/12 bg-white p-2.5 text-ink-soft
+                className="ml-1 rounded-full border-2 border-edge bg-surface p-2.5 text-ink-soft
                            hover:text-ink"
               >
                 <Copy aria-hidden className="size-4" strokeWidth={2.5} />
@@ -225,7 +225,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
               <li
                 key={row.player_id}
                 className={`flex items-center gap-3 rounded-3xl border-2 p-3
-                            ${podium ? "border-hit bg-hit-soft" : "border-ink/12 bg-white"}`}
+                            ${podium ? "border-hit bg-hit-soft" : "border-edge bg-surface"}`}
               >
                 {room.status !== "lobby" && (
                   <span
@@ -283,7 +283,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
               Start {room.rounds} rounds · {room.round_seconds}s each
             </button>
           ) : (
-            <p className="rounded-3xl border-2 border-dashed border-ink/15 bg-white/50 p-5
+            <p className="rounded-3xl border-2 border-dashed border-edge bg-surface/50 p-5
                           text-center text-sm font-medium text-ink-soft">
               Waiting for the host to start.
             </p>
@@ -332,8 +332,8 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
 
 function Tile({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-ink/12
-                    bg-white px-4 py-3 sm:min-w-28">
+    <div className="flex flex-col items-center justify-center rounded-3xl border-2 border-edge
+                    bg-surface px-4 py-3 sm:min-w-28">
       <span className="text-2xl font-black tabular-nums leading-none">{value}</span>
       <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-soft">
         {label}

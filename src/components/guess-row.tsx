@@ -8,7 +8,7 @@ import { compare, type Cell, type Player } from "@/lib/game";
 const TONE: Record<Cell["state"], string> = {
   hit: "bg-hit text-white border-hit",
   close: "bg-close text-ink border-close",
-  miss: "bg-miss text-ink-soft border-ink/10",
+  miss: "bg-miss text-ink-soft border-edge",
 };
 
 const UCL_TONE: Record<Cell["state"], string> = {
@@ -152,7 +152,7 @@ function CellBox({ cell, badge }: { cell: Cell; badge?: string }) {
             }
           />
         </summary>
-        <p className="mt-2 border-t-2 border-ink/15 pt-2 text-[11px] font-medium leading-snug">
+        <p className="mt-2 border-t-2 border-edge pt-2 text-[11px] font-medium leading-snug">
           {cell.note}
         </p>
       </details>
@@ -196,10 +196,10 @@ export function GuessRow({
       className={`rounded-[28px] border-2 p-4 sm:p-5 transition-all motion-reduce:transition-none
                   ${
                     isAnswer
-                      ? "border-brand bg-white"
+                      ? "border-brand bg-surface"
                       : correct
                         ? "border-hit bg-hit-soft"
-                        : "border-ink/12 bg-white"
+                        : "border-edge bg-surface"
                   }`}
     >
       <div className="mb-3 flex items-center gap-3">

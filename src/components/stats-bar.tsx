@@ -4,7 +4,7 @@ import { winRate, type ModeStats } from "@/lib/stats";
 
 function Stat({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="flex flex-col items-center rounded-2xl border-2 border-ink/10 bg-white px-3 py-2">
+    <div className="flex flex-col items-center rounded-2xl border-2 border-edge bg-surface px-3 py-2">
       <span className="text-lg font-black tabular-nums leading-none">{value}</span>
       <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.08em] text-ink-soft">
         {label}

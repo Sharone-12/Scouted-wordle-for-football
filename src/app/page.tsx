@@ -48,7 +48,7 @@ export default function Home() {
               Sc<Ball />uted<span className="text-brand">.</span>
             </span>
           </h1>
-          <div className="mt-8 h-14 animate-pulse rounded-2xl border-2 border-ink/10 bg-white/60" />
+          <div className="mt-8 h-14 animate-pulse rounded-2xl border-2 border-edge bg-surface/60" />
         </main>
       }
     >

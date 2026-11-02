@@ -272,7 +272,7 @@ export function Game({
         <div className="flex flex-wrap items-center gap-2">
         <nav
           aria-label="Game mode"
-          className="flex rounded-full border-2 border-ink/12 bg-white p-1"
+          className="flex rounded-full border-2 border-edge bg-surface p-1"
         >
           {MODES.map(({ id, label, icon: Icon }) => (
             <button
@@ -293,7 +293,7 @@ export function Game({
 
         <Link
           href="/rooms"
-          className="flex items-center gap-1.5 rounded-full border-2 border-ink/12 bg-white px-4 py-2
+          className="flex items-center gap-1.5 rounded-full border-2 border-edge bg-surface px-4 py-2
                      text-xs font-bold text-ink-soft hover:text-ink"
         >
           <Users aria-hidden className="size-3.5" strokeWidth={2.5} />
@@ -301,7 +301,7 @@ export function Game({
         </Link>
         <Link
           href="/leaderboard"
-          className="flex items-center gap-1.5 rounded-full border-2 border-ink/12 bg-white px-4 py-2
+          className="flex items-center gap-1.5 rounded-full border-2 border-edge bg-surface px-4 py-2
                      text-xs font-bold text-ink-soft hover:text-ink"
         >
           <Trophy aria-hidden className="size-3.5" strokeWidth={2.5} />
@@ -320,7 +320,7 @@ export function Game({
             {mode === "daily" ? puzzleDate : "Unlimited"}
           </span>
           {mode === "unlimited" && (
-            <div className="flex items-center gap-1.5 rounded-full border border-ink/10 bg-white px-3 py-1 text-[11px] font-bold text-ink">
+            <div className="flex items-center gap-1.5 rounded-full border border-edge bg-surface px-3 py-1 text-[11px] font-bold text-ink">
               <Flame
                 aria-hidden
                 className={`size-3.5 ${
@@ -406,7 +406,7 @@ export function Game({
               {target && (
                 <div className="flex items-center">
                   {confirmingGiveUp ? (
-                    <div className="flex items-center gap-1.5 rounded-full border border-brand/30 bg-white px-2 py-1">
+                    <div className="flex items-center gap-1.5 rounded-full border border-brand/30 bg-surface px-2 py-1">
                       <span className="px-1 text-xs font-semibold text-ink-soft">
                         Give up?
                       </span>
@@ -429,7 +429,7 @@ export function Game({
                     <button
                       type="button"
                       onClick={() => setConfirmingGiveUp(true)}
-                      className="flex items-center gap-1.5 rounded-full border border-ink/15 bg-white/80 px-3 py-1.5 text-xs font-bold text-ink-soft transition-colors hover:border-brand/40 hover:bg-white hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 motion-reduce:transition-none"
+                      className="flex items-center gap-1.5 rounded-full border border-edge bg-surface/80 px-3 py-1.5 text-xs font-bold text-ink-soft transition-colors hover:border-brand/40 hover:bg-surface hover:text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 motion-reduce:transition-none"
                     >
                       <Flag aria-hidden className="size-3.5" strokeWidth={2.5} />
                       Give up
@@ -444,7 +444,7 @@ export function Game({
 
       {(guesses.length === 0 && !over) || !target ? (
         <p
-          className="mt-8 rounded-[28px] border-2 border-dashed border-ink/15 bg-white/50 p-8
+          className="mt-8 rounded-[28px] border-2 border-dashed border-edge bg-surface/50 p-8
                      text-center text-sm font-medium text-ink-soft"
         >
           Start with any player from a top-5 league. Even a wrong guess narrows it down.

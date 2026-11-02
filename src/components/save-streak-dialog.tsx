@@ -59,7 +59,7 @@ export function SaveStreakDialog({
 
   return (
     <Dialog open={streak !== null && !!runId} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="max-w-sm rounded-[28px] border-2 border-ink/12 bg-white p-6">
+      <DialogContent className="max-w-sm rounded-[28px] border-2 border-edge bg-surface p-6">
         <DialogTitle className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
           <Flame aria-hidden className="size-5 text-brand" strokeWidth={2.5} />
           {streak} in a row
@@ -90,14 +90,14 @@ export function SaveStreakDialog({
               autoFocus
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submit()}
-              className="mt-4 h-12 w-full rounded-2xl border-2 border-ink/15 bg-white px-4
+              className="mt-4 h-12 w-full rounded-2xl border-2 border-edge bg-surface px-4
                          text-base font-semibold outline-none focus-visible:border-brand"
             />
             <div className="mt-3 flex gap-2">
               <button
                 type="button"
                 onClick={onClose}
-                className="h-12 flex-1 rounded-2xl border-2 border-ink/12 text-sm font-bold text-ink-soft"
+                className="h-12 flex-1 rounded-2xl border-2 border-edge text-sm font-bold text-ink-soft"
               >
                 Not now
               </button>

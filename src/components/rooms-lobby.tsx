@@ -53,10 +53,10 @@ export function RoomsLobby() {
   }
 
   const field =
-    "h-11 w-full rounded-2xl border-2 border-ink/15 bg-white px-4 text-base font-semibold " +
+    "h-11 w-full rounded-2xl border-2 border-edge bg-surface px-4 text-base font-semibold " +
     "outline-none placeholder:font-medium placeholder:text-ink-soft/60 focus-visible:border-brand";
   const chip = (on: boolean) =>
-    `rounded-full px-2.5 py-1 text-xs font-bold ${on ? "bg-ink text-white" : "bg-white text-ink-soft border-2 border-ink/12"}`;
+    `rounded-full px-2.5 py-1 text-xs font-bold ${on ? "bg-ink text-white" : "bg-surface text-ink-soft border-2 border-edge"}`;
 
   return (
     // One screen, no scrolling: `h-dvh` tracks the visible viewport on mobile
@@ -93,7 +93,7 @@ export function RoomsLobby() {
         </label>
 
         <div className="grid gap-3 sm:grid-cols-2">
-          <section className="rounded-3xl border-2 border-ink/12 bg-white p-4">
+          <section className="rounded-3xl border-2 border-edge bg-surface p-4">
             <h2 className="text-base font-extrabold tracking-tight">Create a room</h2>
             <div className="mt-3 space-y-2">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -128,7 +128,7 @@ export function RoomsLobby() {
             </button>
           </section>
 
-          <section className="rounded-3xl border-2 border-ink/12 bg-white p-4">
+          <section className="rounded-3xl border-2 border-edge bg-surface p-4">
             <h2 className="text-base font-extrabold tracking-tight">Join a room</h2>
             <input
               className={`mt-3 ${field} text-center text-xl font-black uppercase tracking-[0.3em]`}

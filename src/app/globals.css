@@ -129,35 +129,37 @@
   }
 }
 /* ── Scouted palette ───────────────────────────────────────────────────────
-   Flat saturated fills over a warm canvas. Every pairing below was picked to
-   clear 4.5:1 against its own text colour, because the result colours are the
-   game's primary signal and a washed-out amber would cost players information.
-   Colour is still never alone: each cell also carries an icon.             */
+   Floodlit night. Saturated result colours over a midnight surface, which is
+   what stops the board reading as default white-cards-on-white. Every pairing
+   below clears 4.5:1 against its own text colour, because the result colours
+   are the game's primary signal. Colour is still never alone: each cell also
+   carries an icon.                                                          */
 @theme {
-  --color-canvas: #fcf7f0;
-  --color-canvas-deep: #f0e4d4;
-  --color-ink: #17141f;
-  --color-ink-soft: #6b6477;
+  --color-canvas: #0b1020;
+  --color-canvas-deep: #1f2740;
+  --color-surface: #161c2e;
+  --color-ink: #eef1f8;
+  --color-ink-soft: #97a0ba;
+  --color-edge: #2a3250;
 
-  --color-hit: #0f9d58;
-  --color-hit-soft: #d8f3e4;
+  --color-hit: #22c55e;
+  --color-hit-soft: #123524;
   --color-close: #f5b327;
-  --color-close-soft: #fdeecd;
-  --color-miss: #ffffff;
+  --color-close-soft: #3a2c08;
+  --color-miss: #161c2e;
 
   --color-brand: #ff5a3c;
   --color-brand-deep: #e8402a;
-  --color-cobalt: #2b55e8;
+  --color-cobalt: #4f7cff;
 }
 
 @layer base {
   body {
-    /* The warm cream is the brand surface, so it is left to read as itself.
-       The two washes are faint tints of it rather than the peach and blue
-       that used to sit on top and shift the hue. */
+    /* Two cool pools of light rather than a flat fill, so the surface has
+       somewhere to fall away to. */
     background:
-      radial-gradient(900px 520px at 12% -8%, #fffcf8 0%, transparent 62%),
-      radial-gradient(760px 480px at 92% 4%, #fefaf4 0%, transparent 58%),
+      radial-gradient(900px 540px at 12% -10%, #1a2340 0%, transparent 62%),
+      radial-gradient(760px 480px at 92% 2%, #15203c 0%, transparent 58%),
       var(--color-canvas);
     background-attachment: fixed;
     color: var(--color-ink);

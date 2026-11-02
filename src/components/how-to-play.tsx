@@ -28,7 +28,7 @@ function Cell({
   const tones = {
     hit: "bg-hit text-white border-hit",
     close: "bg-close text-ink border-close",
-    miss: "bg-miss text-ink-soft border-ink/10",
+    miss: "bg-miss text-ink-soft border-edge",
   };
   return (
     <div className={`rounded-2xl border-2 px-3 py-2 ${tones[tone]}`}>
@@ -127,7 +127,7 @@ export function HowToPlay() {
           setStep(0);
           setOpen(true);
         }}
-        className="flex items-center gap-1.5 rounded-full border-2 border-ink/12 bg-white px-4 py-2
+        className="flex items-center gap-1.5 rounded-full border-2 border-edge bg-surface px-4 py-2
                    text-xs font-bold text-ink-soft hover:text-ink"
       >
         <HelpCircle aria-hidden className="size-3.5" strokeWidth={2.5} />
@@ -135,7 +135,7 @@ export function HowToPlay() {
       </button>
 
       <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
-        <DialogContent className="max-w-md rounded-[28px] border-2 border-ink/12 bg-white p-6">
+        <DialogContent className="max-w-md rounded-[28px] border-2 border-edge bg-surface p-6">
           <DialogTitle className="text-xl font-extrabold tracking-tight">
             {current.title}
           </DialogTitle>

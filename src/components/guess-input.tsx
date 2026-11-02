@@ -62,7 +62,7 @@ export function GuessInput({ players, guessed, disabled, onGuess }: Props) {
           setActive(0);
         }}
         onKeyDown={onKeyDown}
-        className="h-14 w-full rounded-2xl border-2 border-ink/15 bg-white px-5 text-base
+        className="h-14 w-full rounded-2xl border-2 border-edge bg-surface px-5 text-base
                    font-semibold outline-none placeholder:font-medium placeholder:text-ink-soft/60
                    focus-visible:border-brand
                    disabled:cursor-not-allowed disabled:bg-canvas-deep disabled:text-ink-soft"
@@ -73,7 +73,7 @@ export function GuessInput({ players, guessed, disabled, onGuess }: Props) {
           id="guess-options"
           role="listbox"
           className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border-2
-                     border-ink/15 bg-white"
+                     border-edge bg-surface"
         >
           {matches.map((p, i) => (
             <li key={p.id} role="option" aria-selected={i === active}>
@@ -87,7 +87,7 @@ export function GuessInput({ players, guessed, disabled, onGuess }: Props) {
                 }}
                 onMouseEnter={() => setActive(i)}
                 className={`flex w-full items-baseline justify-between gap-3 px-5 py-3 text-left
-                            ${i === active ? "bg-brand text-white" : "bg-white"}`}
+                            ${i === active ? "bg-brand text-white" : "bg-surface"}`}
               >
                 <span className="flex items-center gap-2 font-bold">
                   <Image

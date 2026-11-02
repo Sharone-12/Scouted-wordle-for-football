@@ -19,7 +19,7 @@ async function Board() {
   return (
     <>
       {entries.length === 0 ? (
-        <p className="mt-8 rounded-[28px] border-2 border-dashed border-ink/15 bg-white/50 p-8 text-center text-sm font-medium text-ink-soft">
+        <p className="mt-8 rounded-[28px] border-2 border-dashed border-edge bg-surface/50 p-8 text-center text-sm font-medium text-ink-soft">
           Nobody has posted a streak yet. Be first.
         </p>
       ) : (
@@ -27,7 +27,7 @@ async function Board() {
           {entries.map((row, i) => (
             <li
               key={`${row.name}-${row.created_at}`}
-              className="flex items-center gap-3 rounded-2xl border-2 border-ink/12 bg-white px-4 py-3"
+              className="flex items-center gap-3 rounded-2xl border-2 border-edge bg-surface px-4 py-3"
             >
               <span className="w-6 text-right text-sm font-black tabular-nums text-ink-soft">
                 {i + 1}
