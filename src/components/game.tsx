@@ -403,7 +403,10 @@ export function Game({
                 </span>
               </div>
 
-              {target && (
+              {/* A verified run has no client-side target, so gating on one hid
+                  Give up in unlimited entirely. What matters is that there is
+                  something live to give up on. */}
+              {(verified ? !!runId && !runEnded : !!target) && (
                 <div className="flex items-center">
                   {confirmingGiveUp ? (
                     <div className="flex items-center gap-1.5 rounded-full border border-brand/30 bg-surface px-2 py-1">
