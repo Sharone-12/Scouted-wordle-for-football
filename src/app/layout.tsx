@@ -15,6 +15,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Scouted — Wordle for football",
   description: "Guess the mystery footballer in ten tries.",
+  icons: {
+    icon: "/ball.png",
+    apple: "/ball.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
