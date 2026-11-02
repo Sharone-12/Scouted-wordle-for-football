@@ -243,9 +243,16 @@ export function GuessRow({
       </div>
 
       <div className="grid grid-cols-2 items-start gap-2 sm:grid-cols-4">
-        {cells.map((cell) => (
-          <CellBox
+        {cells.map((cell, i) => (
+          // Staggered per cell, so the row reveals in sequence. `animate-none`
+          // under reduced motion leaves the tile in its resting state rather
+          // than hiding it, since the animation is what makes it visible.
+          <div
             key={cell.key}
+            className="tile-flip motion-reduce:animate-none"
+            style={{ animationDelay: `${i * 70}ms` }}
+          >
+          <CellBox
             cell={cell}
             badge={
               cell.key === "team"
@@ -255,6 +262,7 @@ export function GuessRow({
                   : undefined
             }
           />
+          </div>
         ))}
       </div>
 

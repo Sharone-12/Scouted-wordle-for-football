@@ -198,3 +198,29 @@
     color: var(--color-ink);
   }
 }
+
+/* Wordle's tile reveal: each cell swings in on its own, one after the next,
+   so the row reads left to right instead of appearing all at once.
+   `backwards` keeps a tile invisible until its delay elapses, otherwise every
+   cell would be on screen before its turn. */
+@keyframes tile-flip {
+  0% {
+    transform: perspective(620px) rotateX(-92deg);
+    opacity: 0;
+  }
+  55% {
+    transform: perspective(620px) rotateX(9deg);
+    opacity: 1;
+  }
+  100% {
+    transform: perspective(620px) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .tile-flip {
+    animation: tile-flip 420ms cubic-bezier(0.2, 0, 0, 1) backwards;
+    transform-origin: center top;
+  }
+}
