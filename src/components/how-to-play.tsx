@@ -135,7 +135,7 @@ export function HowToPlay() {
       </button>
 
       <Dialog open={open} onOpenChange={(next) => (next ? setOpen(true) : close())}>
-        <DialogContent className="max-w-md rounded-[28px] border-2 border-edge bg-surface p-6">
+        <DialogContent className="max-w-md rounded-[28px] border-2 border-edge bg-surface p-6 text-ink">
           <DialogTitle className="text-xl font-extrabold tracking-tight">
             {current.title}
           </DialogTitle>

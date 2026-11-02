@@ -59,7 +59,7 @@ export function SaveStreakDialog({
 
   return (
     <Dialog open={streak !== null && !!runId} onOpenChange={(next) => !next && onClose()}>
-      <DialogContent className="max-w-sm rounded-[28px] border-2 border-edge bg-surface p-6">
+      <DialogContent className="max-w-sm rounded-[28px] border-2 border-edge bg-surface p-6 text-ink">
         <DialogTitle className="flex items-center gap-2 text-xl font-extrabold tracking-tight">
           <Flame aria-hidden className="size-5 text-brand" strokeWidth={2.5} />
           {streak} in a row

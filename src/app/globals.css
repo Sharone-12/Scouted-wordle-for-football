@@ -153,6 +153,39 @@
   --color-cobalt: #4f7cff;
 }
 
+/* shadcn's own tokens still described a light theme, so any component built
+   on them — the dialog first — rendered dark text on the dark surface. They
+   are re-pointed at the floodlit palette here rather than patched per
+   component, which would leave the next one to go wrong. */
+:root {
+  --background: #0b1020;
+  --foreground: #eef1f8;
+  --card: #161c2e;
+  --card-foreground: #eef1f8;
+  --popover: #161c2e;
+  --popover-foreground: #eef1f8;
+  --primary: #eef1f8;
+  --primary-foreground: #0b1020;
+  --secondary: #1f2740;
+  --secondary-foreground: #eef1f8;
+  --muted: #1f2740;
+  --muted-foreground: #97a0ba;
+  --accent: #1f2740;
+  --accent-foreground: #eef1f8;
+  --destructive: #ff5a3c;
+  --border: #2a3250;
+  --input: #2a3250;
+  --ring: #4f7cff;
+  --sidebar: #161c2e;
+  --sidebar-foreground: #eef1f8;
+  --sidebar-primary: #eef1f8;
+  --sidebar-primary-foreground: #0b1020;
+  --sidebar-accent: #1f2740;
+  --sidebar-accent-foreground: #eef1f8;
+  --sidebar-border: #2a3250;
+  --sidebar-ring: #4f7cff;
+}
+
 @layer base {
   body {
     /* Two cool pools of light rather than a flat fill, so the surface has
