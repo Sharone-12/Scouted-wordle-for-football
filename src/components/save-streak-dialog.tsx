@@ -73,7 +73,7 @@ export function SaveStreakDialog({
             <button
               type="button"
               onClick={onClose}
-              className="mt-5 h-12 w-full rounded-2xl bg-ink text-sm font-bold text-white"
+              className="mt-5 h-12 w-full rounded-2xl bg-ink text-sm font-bold text-canvas"
             >
               Keep playing
             </button>

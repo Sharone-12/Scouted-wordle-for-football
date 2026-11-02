@@ -56,7 +56,7 @@ export function RoomsLobby() {
     "h-11 w-full rounded-2xl border-2 border-edge bg-surface px-4 text-base font-semibold " +
     "outline-none placeholder:font-medium placeholder:text-ink-soft/60 focus-visible:border-brand";
   const chip = (on: boolean) =>
-    `rounded-full px-2.5 py-1 text-xs font-bold ${on ? "bg-ink text-white" : "bg-surface text-ink-soft border-2 border-edge"}`;
+    `rounded-full px-2.5 py-1 text-xs font-bold ${on ? "bg-ink text-canvas" : "bg-surface text-ink-soft border-2 border-edge"}`;
 
   return (
     // One screen, no scrolling: `h-dvh` tracks the visible viewport on mobile
@@ -142,7 +142,7 @@ export function RoomsLobby() {
               type="button"
               disabled={busy}
               onClick={join}
-              className="mt-3 h-11 w-full rounded-2xl bg-ink text-sm font-bold text-white
+              className="mt-3 h-11 w-full rounded-2xl bg-ink text-sm font-bold text-canvas
                          hover:bg-ink/90 disabled:opacity-50"
             >
               Join

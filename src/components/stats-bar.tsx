@@ -35,8 +35,8 @@ export function StreakChip({ stats }: { stats: ModeStats }) {
   const onBest = stats.current >= stats.best && stats.best > 0;
   return (
     <span
-      className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold text-white
-                  ${onBest ? "bg-brand" : "bg-ink/70"}`}
+      className={`flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold
+                  ${onBest ? "bg-brand text-white" : "bg-ink/80 text-canvas"}`}
       title={onBest ? "Your best run yet" : `Best: ${stats.best}`}
     >
       {onBest ? (

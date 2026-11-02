@@ -282,7 +282,7 @@ export function Game({
               onClick={() => selectMode(id)}
               className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold
                           transition-colors motion-reduce:transition-none ${
-                            mode === id ? "bg-ink text-white" : "text-ink-soft hover:text-ink"
+                            mode === id ? "bg-ink text-canvas" : "text-ink-soft hover:text-ink"
                           }`}
             >
               <Icon aria-hidden className="size-3.5" strokeWidth={2.5} />
@@ -313,7 +313,7 @@ export function Game({
 
       <div className="mb-6 max-w-xl">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-ink px-3 py-1 text-[11px] font-bold text-white tabular-nums">
+          <span className="rounded-full bg-ink px-3 py-1 text-[11px] font-bold text-canvas tabular-nums">
             {mode === "daily" ? `No. ${puzzleNumber}` : `Round ${round}`}
           </span>
           <span className="text-xs font-bold uppercase tracking-[0.1em] text-ink-soft">
@@ -356,8 +356,8 @@ export function Game({
           {over && (verified ? true : !!target) ? (
             <div className="flex flex-wrap items-center gap-2">
               <span
-                className={`rounded-full px-3.5 py-1.5 text-xs font-bold text-white
-                            ${won ? "bg-hit" : "bg-ink"}`}
+                className={`rounded-full px-3.5 py-1.5 text-xs font-bold
+                            ${won ? "bg-hit text-white" : "bg-ink text-canvas"}`}
               >
                 {won
                   ? `Got it in ${guesses.length}`
@@ -387,7 +387,7 @@ export function Game({
           ) : (
             <>
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-ink px-3.5 py-1.5 text-xs font-bold text-white tabular-nums">
+                <span className="rounded-full bg-ink px-3.5 py-1.5 text-xs font-bold text-canvas tabular-nums">
                   {left} left
                 </span>
                 {/* Ten pips: the count is legible at a glance, not just as a number. */}

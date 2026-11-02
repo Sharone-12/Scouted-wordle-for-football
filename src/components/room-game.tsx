@@ -196,7 +196,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
           </h1>
           <span
             className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold
-                        text-white tabular-nums ${left <= 10 ? "bg-brand" : "bg-ink"}`}
+                        tabular-nums ${left <= 10 ? "bg-brand text-white" : "bg-ink text-canvas"}`}
           >
             <Timer aria-hidden className="size-4" strokeWidth={2.5} />
             {left}s
@@ -294,7 +294,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
       {room.status === "done" && (
         <Link
           href="/rooms"
-          className="mt-4 block h-14 rounded-2xl bg-ink pt-4 text-center text-sm font-bold text-white"
+          className="mt-4 block h-14 rounded-2xl bg-ink pt-4 text-center text-sm font-bold text-canvas"
         >
           New room
         </Link>
