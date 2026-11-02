@@ -88,3 +88,8 @@ begin
     alter publication supabase_realtime add table room_results;
   end if;
 end $$;
+
+-- One row per player, holding their best run. Without this a single person
+-- posting repeatedly fills the whole top 20 and the board stops being a
+-- ranking of players.
+create unique index if not exists leaderboard_name_key on leaderboard (lower(name));

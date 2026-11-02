@@ -27,7 +27,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid streak" }, { status: 400 });
   }
   const db = serviceClient();
+
+  // One row per player, holding their best run. Inserting every submission
+  // would let one person repeat-post their way across the whole top 20, and a
+  // later worse run must not replace a better one already on the board.
+  const existing = await db
+    .from("leaderboard")
+    .select("id,streak")
+    .ilike("name", name)
+    .maybeSingle();
+
+  if (existing.data) {
+    if (existing.data.streak >= streak) {
+      return NextResponse.json({ ok: true, best: existing.data.streak, changed: false });
+    }
+    const { error } = await db
+      .from("leaderboard")
+      .update({ name, streak, created_at: new Date().toISOString() })
+      .eq("id", existing.data.id);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ ok: true, best: streak, changed: true });
+  }
+
   const { error } = await db.from("leaderboard").insert({ name, streak });
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
+  // 23505 means another request inserted the same name a moment ago; their
+  // row is already there, so this is not a failure worth showing anyone.
+  if (error && error.code !== "23505") {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json({ ok: true, best: streak, changed: true });
 }
