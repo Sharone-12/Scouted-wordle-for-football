@@ -442,7 +442,10 @@ export function Game({
         </div>
       </div>
 
-      {(guesses.length === 0 && !over) || !target ? (
+      {/* A verified run never hands the client a target, so requiring one here
+          meant unlimited always fell through to the empty state and no guess
+          ever appeared on the board. */}
+      {(guesses.length === 0 && !over) || (!verified && !target) ? (
         <p
           className="mt-8 rounded-[28px] border-2 border-dashed border-edge bg-surface/50 p-8
                      text-center text-sm font-medium text-ink-soft"
@@ -455,7 +458,7 @@ export function Game({
             <GuessRow
               key={guess.id}
               guess={guess}
-              target={verified ? undefined : target}
+              target={verified ? undefined : (target ?? undefined)}
               cells={verified ? runCells[guess.id] : undefined}
               correct={verified ? runSolvedId === guess.id : undefined}
               index={i}
