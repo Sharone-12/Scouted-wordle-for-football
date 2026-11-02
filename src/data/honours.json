@@ -1,0 +1,636 @@
+{
+  "_comment": "Hand-curated honours, MANUAL FILE - safe to edit. Counts are as of the END OF 2024/25. Titles from 2025/26 onward are computed from the scraped data by scripts/fetch_players.py and must NOT be added here, or they double-count.",
+  "_scope": "ucl = Champions League winner's medals. league = titles in the top 5 European leagues only (PL, La Liga, Serie A, Bundesliga, Ligue 1); titles elsewhere (Eredivisie, Primeira Liga, Austrian, Brasileirao...) are deliberately not counted, so the number means the same thing for every player.",
+  "_format": "name: [uclTitles, leagueTitles]. Anyone absent is treated as [0, 0]. Two players in the pool share a name (Vitinha, Iker Munoz), so a colliding name must be written 'Name|Club' or the build refuses to apply it.",
+  "asOf": "2024/25",
+  "players": {
+    "Achraf Hakimi": [
+      1,
+      5
+    ],
+    "Adrien Rabiot": [
+      0,
+      6
+    ],
+    "Alejandro Balde": [
+      0,
+      2
+    ],
+    "Aleksandar Pavlović": [
+      0,
+      1
+    ],
+    "Alessandro Bastoni": [
+      0,
+      2
+    ],
+    "Alex Meret": [
+      0,
+      2
+    ],
+    "Alexis Mac Allister": [
+      0,
+      1
+    ],
+    "Alexis Saelemaekers": [
+      0,
+      1
+    ],
+    "Alisson": [
+      1,
+      2
+    ],
+    "Alphonso Davies": [
+      1,
+      5
+    ],
+    "Amir Rrahmani": [
+      0,
+      2
+    ],
+    "Andy Robertson": [
+      1,
+      2
+    ],
+    "Antonio Rüdiger": [
+      2,
+      1
+    ],
+    "Arda Güler": [
+      1,
+      1
+    ],
+    "Aurélien Tchouaméni": [
+      1,
+      1
+    ],
+    "Aymeric Laporte": [
+      0,
+      5
+    ],
+    "Ben Chilwell": [
+      1,
+      0
+    ],
+    "Benjamin André": [
+      0,
+      1
+    ],
+    "Bernardo Silva": [
+      1,
+      7
+    ],
+    "Bradley Barcola": [
+      1,
+      2
+    ],
+    "Brahim Díaz": [
+      1,
+      2
+    ],
+    "Callum Hudson Odoi": [
+      1,
+      0
+    ],
+    "Carles Aleñá": [
+      0,
+      2
+    ],
+    "Carlos Soler": [
+      0,
+      2
+    ],
+    "Christian Pulišić": [
+      1,
+      0
+    ],
+    "Christopher Nkunku": [
+      0,
+      3
+    ],
+    "Cody Gakpo": [
+      0,
+      1
+    ],
+    "Cole Palmer": [
+      1,
+      3
+    ],
+    "Corentin Tolisso": [
+      1,
+      5
+    ],
+    "Dani Carvajal": [
+      6,
+      4
+    ],
+    "Dani Ceballos": [
+      2,
+      3
+    ],
+    "Dani Olmo": [
+      0,
+      1
+    ],
+    "Daniele Rugani": [
+      0,
+      5
+    ],
+    "Danny Welbeck": [
+      0,
+      2
+    ],
+    "David Alaba": [
+      4,
+      12
+    ],
+    "David De Gea": [
+      0,
+      2
+    ],
+    "Dayot Upamecano": [
+      0,
+      3
+    ],
+    "Denis Suárez": [
+      0,
+      1
+    ],
+    "Djibril Sidibé": [
+      0,
+      1
+    ],
+    "Dominik Szoboszlai": [
+      0,
+      1
+    ],
+    "Désiré Doué": [
+      1,
+      1
+    ],
+    "Edin Džeko": [
+      0,
+      3
+    ],
+    "Edmond Tapsoba": [
+      0,
+      1
+    ],
+    "Eduardo Camavinga": [
+      2,
+      2
+    ],
+    "Eljif Elmas": [
+      0,
+      1
+    ],
+    "Emre Can": [
+      0,
+      2
+    ],
+    "Eric García": [
+      0,
+      2
+    ],
+    "Erling Haaland": [
+      1,
+      2
+    ],
+    "Federico Bernardeschi": [
+      0,
+      3
+    ],
+    "Federico Chiesa": [
+      0,
+      1
+    ],
+    "Federico Dimarco": [
+      0,
+      2
+    ],
+    "Federico Valverde": [
+      2,
+      3
+    ],
+    "Ferland Mendy": [
+      2,
+      3
+    ],
+    "Fermín López": [
+      0,
+      1
+    ],
+    "Ferran Torres": [
+      0,
+      3
+    ],
+    "Fikayo Tomori": [
+      0,
+      1
+    ],
+    "Florian Wirtz": [
+      0,
+      1
+    ],
+    "Franck Kessié": [
+      0,
+      2
+    ],
+    "Frank Anguissa": [
+      0,
+      2
+    ],
+    "Giacomo Raspadori": [
+      0,
+      2
+    ],
+    "Gianluigi Donnarumma": [
+      1,
+      5
+    ],
+    "Giovanni Di Lorenzo": [
+      0,
+      2
+    ],
+    "Giovanni Simeone": [
+      0,
+      1
+    ],
+    "Gonçalo Guedes": [
+      0,
+      1
+    ],
+    "Gonçalo Ramos": [
+      1,
+      2
+    ],
+    "Granit Xhaka": [
+      0,
+      1
+    ],
+    "Harry Kane": [
+      0,
+      1
+    ],
+    "Hugo Ekitiké": [
+      0,
+      1
+    ],
+    "Ibrahima Konaté": [
+      0,
+      1
+    ],
+    "Isco": [
+      4,
+      2
+    ],
+    "Jack Grealish": [
+      1,
+      3
+    ],
+    "Jamal Musiala": [
+      0,
+      5
+    ],
+    "Jan Oblak": [
+      0,
+      1
+    ],
+    "Joe Gomez": [
+      1,
+      2
+    ],
+    "John Stones": [
+      1,
+      6
+    ],
+    "Jonas Hofmann": [
+      0,
+      1
+    ],
+    "Jonathan David": [
+      0,
+      1
+    ],
+    "Jonathan Ikoné": [
+      0,
+      1
+    ],
+    "Jordan Henderson": [
+      1,
+      1
+    ],
+    "José María Giménez": [
+      0,
+      1
+    ],
+    "João Neves": [
+      1,
+      1
+    ],
+    "Joško Gvardiol": [
+      0,
+      1
+    ],
+    "Juan Jesus": [
+      0,
+      2
+    ],
+    "Jude Bellingham": [
+      1,
+      1
+    ],
+    "Jules Koundé": [
+      0,
+      2
+    ],
+    "Julián Alvarez": [
+      1,
+      2
+    ],
+    "Jurriën Timber": [
+      0,
+      0
+    ],
+    "Jérémy Doku": [
+      0,
+      1
+    ],
+    "Kai Havertz": [
+      1,
+      0
+    ],
+    "Kevin De Bruyne": [
+      1,
+      6
+    ],
+    "Kevin Trapp": [
+      0,
+      2
+    ],
+    "Khvicha Kvaratskhelia": [
+      1,
+      2
+    ],
+    "Koke": [
+      0,
+      2
+    ],
+    "Kylian Mbappé": [
+      0,
+      7
+    ],
+    "Lamine Yamal": [
+      0,
+      2
+    ],
+    "Lautaro Martínez": [
+      0,
+      2
+    ],
+    "Leonardo Spinazzola": [
+      0,
+      1
+    ],
+    "Lucas Digne": [
+      0,
+      2
+    ],
+    "Lucas Vázquez": [
+      5,
+      4
+    ],
+    "Luis Díaz": [
+      0,
+      1
+    ],
+    "Luka Modrić": [
+      6,
+      4
+    ],
+    "Marc Bartra": [
+      1,
+      2
+    ],
+    "Marc Roca": [
+      0,
+      1
+    ],
+    "Marcel Sabitzer": [
+      0,
+      2
+    ],
+    "Marcos Alonso": [
+      1,
+      2
+    ],
+    "Marcos Llorente": [
+      0,
+      1
+    ],
+    "Marcus Thuram": [
+      0,
+      1
+    ],
+    "Mario Götze": [
+      0,
+      5
+    ],
+    "Mario Hermoso": [
+      0,
+      1
+    ],
+    "Mason Mount": [
+      1,
+      0
+    ],
+    "Mateo Kovačić": [
+      3,
+      2
+    ],
+    "Matheus Nunes": [
+      0,
+      1
+    ],
+    "Mathías Olivera": [
+      0,
+      2
+    ],
+    "Matteo Politano": [
+      0,
+      2
+    ],
+    "Matthijs de Ligt": [
+      0,
+      2
+    ],
+    "Michael Olise": [
+      0,
+      1
+    ],
+    "Mike Maignan": [
+      0,
+      2
+    ],
+    "Moise Kean": [
+      0,
+      2
+    ],
+    "Moussa Diaby": [
+      0,
+      1
+    ],
+    "Nemanja Matić": [
+      0,
+      2
+    ],
+    "Neto": [
+      0,
+      1
+    ],
+    "Nicolò Barella": [
+      0,
+      2
+    ],
+    "Nordi Mukiele": [
+      0,
+      2
+    ],
+    "Nuno Mendes": [
+      1,
+      4
+    ],
+    "Olivier Giroud": [
+      1,
+      2
+    ],
+    "Ousmane Dembélé": [
+      1,
+      4
+    ],
+    "Patrik Schick": [
+      0,
+      1
+    ],
+    "Pau Cubarsí": [
+      0,
+      1
+    ],
+    "Paulo Dybala": [
+      0,
+      5
+    ],
+    "Pedri": [
+      0,
+      2
+    ],
+    "Phil Foden": [
+      1,
+      6
+    ],
+    "Piero Hincapié": [
+      0,
+      1
+    ],
+    "Pierre-Emile Højbjerg": [
+      0,
+      2
+    ],
+    "Randal Kolo Muani": [
+      0,
+      1
+    ],
+    "Raphinha": [
+      0,
+      2
+    ],
+    "Reece James": [
+      1,
+      0
+    ],
+    "Robert Andrich": [
+      0,
+      1
+    ],
+    "Rodri": [
+      1,
+      5
+    ],
+    "Rodrygo": [
+      2,
+      3
+    ],
+    "Ruben Loftus-Cheek": [
+      0,
+      1
+    ],
+    "Ryan Gravenberch": [
+      0,
+      2
+    ],
+    "Rúben Dias": [
+      1,
+      4
+    ],
+    "Sandro Tonali": [
+      0,
+      1
+    ],
+    "Scott McTominay": [
+      0,
+      1
+    ],
+    "Stanislav Lobotka": [
+      0,
+      2
+    ],
+    "Tammy Abraham": [
+      1,
+      0
+    ],
+    "Thibaut Courtois": [
+      2,
+      6
+    ],
+    "Thomas Lemar": [
+      0,
+      2
+    ],
+    "Thomas Meunier": [
+      0,
+      3
+    ],
+    "Timothy Weah": [
+      0,
+      1
+    ],
+    "Trent Alexander-Arnold": [
+      1,
+      2
+    ],
+    "Vinícius Júnior": [
+      2,
+      3
+    ],
+    "Virgil van Dijk": [
+      1,
+      2
+    ],
+    "Vitinha|Paris Saint-Germain": [
+      1,
+      3
+    ],
+    "Warren Zaïre-Emery": [
+      1,
+      3
+    ],
+    "Willian Pacho": [
+      1,
+      1
+    ],
+    "Yuri Berchiche": [
+      0,
+      1
+    ]
+  }
+}
