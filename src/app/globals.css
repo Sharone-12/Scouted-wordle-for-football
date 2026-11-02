@@ -241,6 +241,10 @@
   }
 
   .tile-face {
-    animation: tile-face 560ms steps(1, end) backwards;
+    /* `both`, not `backwards`: backwards only holds the first keyframe until
+       the delay elapses, and once the animation finished the face reverted to
+       its natural opacity and covered the result for good. `forwards` is what
+       keeps it hidden afterwards. */
+    animation: tile-face 560ms steps(1, end) both;
   }
 }
