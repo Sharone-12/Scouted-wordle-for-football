@@ -345,7 +345,21 @@ export function Game({
         </p>
       </div>
 
-      <div className="sticky top-0 z-10 -mx-4 bg-canvas/80 px-4 pb-4 pt-3 backdrop-blur-md">
+      <div className="sticky top-0 z-10 -mx-4 px-4 pb-4 pt-3">
+        {/*
+          The blur sits on its own layer, masked so it fades out downwards.
+          Applying it to the container drew a hard-edged rectangle of visibly
+          different texture across the page, and masking the container itself
+          would fade the controls along with it.
+        */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 -top-px bottom-0 bg-canvas/70
+                     backdrop-blur-md
+                     [mask-image:linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)]
+                     [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)]"
+        />
+        <div className="relative">
         <GuessInput
           players={players}
           guessed={guessed}
@@ -442,6 +456,7 @@ export function Game({
               )}
             </>
           )}
+        </div>
         </div>
       </div>
 
