@@ -237,6 +237,20 @@
 }
 
 @layer utilities {
+  /* The sticky bar's backdrop.
+     A blurred strip always has an edge somewhere — first the bottom, then the
+     sides, then the top. This instead repeats the body's own background with
+     the same fixed attachment, so it lines up with the page pixel for pixel
+     and simply hides whatever scrolls beneath it. There is no seam because
+     there is no difference to see. */
+  .page-scrim {
+    background:
+      radial-gradient(900px 540px at 12% -10%, #1a2340 0%, transparent 62%),
+      radial-gradient(760px 480px at 92% 2%, #15203c 0%, transparent 58%),
+      var(--color-canvas);
+    background-attachment: fixed;
+  }
+
   .tile-flip {
     animation: tile-flip 560ms ease-in-out backwards;
     transform-style: preserve-3d;

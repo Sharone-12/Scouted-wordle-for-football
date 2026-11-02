@@ -347,22 +347,22 @@ export function Game({
 
       <div className="sticky top-0 z-10 -mx-4 px-4 pb-4 pt-3">
         {/*
-          The blur sits on its own layer, full-bleed and masked so it fades out
-          downwards.
+          The backdrop is a repeat of the page's own background rather than a
+          blur.
 
-          Two things made this look like a pasted-on rectangle. Applying the
-          blur to the container gave it a hard bottom edge, and confining it to
-          the content column left hard vertical edges with the board sharp
-          outside them and blurred inside. It now spans the viewport, so there
-          are no side edges to see, and masking a separate layer keeps the
-          controls fully opaque rather than fading with it.
+          A blurred strip kept showing an edge: first a hard bottom, then hard
+          sides once it was masked, then a hard top once it was full-bleed.
+          Matching the body's fixed-attachment background removes the problem
+          at the source — the strip is indistinguishable from the page, so the
+          only visible boundary is the soft bottom fade. Masking a separate
+          layer keeps the controls fully opaque rather than fading with it.
         */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-y-0 left-1/2 w-screen -translate-x-1/2
-                     bg-canvas/70 backdrop-blur-md
-                     [mask-image:linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)]
-                     [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_55%,transparent_100%)]"
+          className="page-scrim pointer-events-none absolute inset-y-0 left-1/2 w-screen
+                     -translate-x-1/2
+                     [mask-image:linear-gradient(to_bottom,black_0%,black_62%,transparent_100%)]
+                     [-webkit-mask-image:linear-gradient(to_bottom,black_0%,black_62%,transparent_100%)]"
         />
         <div className="relative">
         <GuessInput
