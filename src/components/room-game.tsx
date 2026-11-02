@@ -213,7 +213,10 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
         <h2 className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink-soft">
           {room.status === "done" ? "Results" : `Players (${players.length})`}
         </h2>
-        <ol className="mt-2 grid gap-2 sm:grid-cols-2">
+        {/* Two columns only in the lobby, where nobody is ranked yet. Once
+            there are positions the list has to read top to bottom, or second
+            place sits to the right of first and the order looks arbitrary. */}
+        <ol className={`mt-2 grid gap-2 ${room.status === "lobby" ? "sm:grid-cols-2" : ""}`}>
           {table.map((row) => {
             const isMe = row.player_id === me;
             const answered = answeredThisRound.has(row.player_id);
@@ -224,6 +227,14 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
                 className={`flex items-center gap-3 rounded-3xl border-2 p-3
                             ${podium ? "border-hit bg-hit-soft" : "border-ink/12 bg-white"}`}
               >
+                {room.status !== "lobby" && (
+                  <span
+                    className={`grid size-8 shrink-0 place-items-center rounded-xl text-sm font-black
+                                tabular-nums ${podium ? "bg-hit text-white" : "bg-canvas-deep text-ink-soft"}`}
+                  >
+                    {row.rank}
+                  </span>
+                )}
                 <span
                   className={`grid size-10 shrink-0 place-items-center rounded-2xl text-sm font-black
                               ${isMe ? "bg-brand text-white" : "bg-canvas-deep text-ink"}`}
@@ -247,7 +258,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
                     {room.status === "lobby"
                       ? "Ready"
                       : room.status === "done"
-                        ? `${row.solved} solved · rank ${row.rank}`
+                        ? `${row.solved} of ${room.rounds} solved`
                         : answered
                           ? "Answered"
                           : "Playing…"}
