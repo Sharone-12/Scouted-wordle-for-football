@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
-import { roundOver, scoreRound, type Room, type RoomPlayer, type RoomResult } from "@/lib/room";
+import {
+  roundOver,
+  scoreRound,
+  secondsLeft,
+  type Room,
+  type RoomPlayer,
+  type RoomResult,
+} from "@/lib/room";
 import { serviceClient } from "@/lib/supabase-server";
 
 type Ctx = { params: Promise<{ code: string }> };
@@ -75,7 +82,10 @@ export async function POST(request: Request, { params }: Ctx) {
     }
     const solved = Boolean(body.solved);
     const guesses = Number(body.guesses) || 0;
-    const points = scoreRound(solved, guesses);
+    // The clock is read from the room's own start time at the moment the
+    // result lands, never from the client: a self-reported finishing time
+    // would be the easiest thing in the game to lie about.
+    const points = scoreRound(solved, guesses, secondsLeft(room), room.round_seconds);
     // ignoreDuplicates: a resubmitted round keeps its first score rather than
     // letting a player replay for a better one.
     const { error } = await db.from("room_results").upsert(

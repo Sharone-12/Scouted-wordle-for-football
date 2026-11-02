@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { makeCode, roundOver, scoreRound, secondsLeft, standings, type Room } from "./room.ts";
+import { MAX_GUESSES } from "./game.ts";
+import {
+  makeCode,
+  MAX_TIME_BONUS,
+  roundOver,
+  scoreRound,
+  secondsLeft,
+  standings,
+  type Room,
+} from "./room.ts";
 
 const room = (over: Partial<Room> = {}): Room => ({
   code: "ABCD", host_id: "h", status: "playing", rounds: 5, round_seconds: 90,
@@ -24,6 +33,30 @@ test("scoring rewards solving early and never goes negative", () => {
   // Out-of-range guess counts are clamped rather than producing odd scores.
   assert.equal(scoreRound(true, 0), 100);
   assert.equal(scoreRound(true, 99), 10);
+});
+
+test("time only separates players who used the same number of guesses", () => {
+  const fast = scoreRound(true, 4, 60, 60);
+  const slow = scoreRound(true, 4, 0, 60);
+  assert.ok(fast > slow, "the quicker of two equal guess counts must win");
+  assert.equal(fast - slow, MAX_TIME_BONUS);
+
+  // The decisive property: one fewer guess beats any amount of speed.
+  for (let guesses = 2; guesses <= MAX_GUESSES; guesses++) {
+    const fewerButSlowest = scoreRound(true, guesses - 1, 0, 60);
+    const moreButInstant = scoreRound(true, guesses, 60, 60);
+    assert.ok(
+      fewerButSlowest > moreButInstant,
+      `${guesses - 1} guesses slowly (${fewerButSlowest}) must beat ${guesses} instantly (${moreButInstant})`,
+    );
+  }
+});
+
+test("the time bonus is ignored when there is no clock to measure", () => {
+  assert.equal(scoreRound(true, 3, 30, 0), 80);
+  // Nonsense inputs are clamped, never producing more than the cap.
+  assert.equal(scoreRound(true, 3, 9999, 60), 80 + MAX_TIME_BONUS);
+  assert.equal(scoreRound(true, 3, -50, 60), 80);
 });
 
 test("the clock counts down and floors at zero", () => {

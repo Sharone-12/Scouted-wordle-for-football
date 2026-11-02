@@ -34,14 +34,31 @@ export function makeCode(random = Math.random): string {
   return code;
 }
 
+/** The most a fast finish can add. Deliberately below the 10 points a single
+ *  guess is worth, so speed can only ever separate equal guess counts. */
+export const MAX_TIME_BONUS = 9;
+
 /**
- * Points for one round: solving in the first guess is worth 100, each further
- * guess costs 10, and a tenth-guess win still beats not solving it.
+ * Points for one round.
+ *
+ * Guesses decide it: solving first try is 100, each further guess costs 10.
+ * Time only breaks ties. The bonus tops out at 9, one short of a guess, which
+ * guarantees that solving in fewer guesses always outscores solving in more,
+ * however slow you were. Two players on the same guess count are separated by
+ * who got there first.
  */
-export function scoreRound(solved: boolean, guesses: number): number {
+export function scoreRound(
+  solved: boolean,
+  guesses: number,
+  secondsRemaining = 0,
+  roundSeconds = 0,
+): number {
   if (!solved) return 0;
   const used = Math.min(Math.max(guesses, 1), MAX_GUESSES);
-  return (MAX_GUESSES + 1 - used) * 10;
+  const base = (MAX_GUESSES + 1 - used) * 10;
+  if (roundSeconds <= 0) return base;
+  const share = Math.min(Math.max(secondsRemaining, 0), roundSeconds) / roundSeconds;
+  return base + Math.round(MAX_TIME_BONUS * share);
 }
 
 /** Seconds left in the round, floored at zero. */
@@ -71,6 +88,9 @@ export function standings(players: RoomPlayer[], results: RoomResult[]): Standin
   }
   const rows = players
     .map((p) => ({ ...p, solved: solvedBy.get(p.player_id) ?? 0 }))
+    // Score already carries the time bonus, so it decides. Rounds solved
+    // breaks a dead heat, and the name keeps the order stable rather than
+    // whatever the database happened to return.
     .sort((a, b) => b.score - a.score || b.solved - a.solved || a.name.localeCompare(b.name));
 
   let rank = 0;
