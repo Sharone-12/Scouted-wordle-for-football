@@ -244,14 +244,24 @@ export function GuessRow({
 
       <div className="grid grid-cols-2 items-start gap-2 sm:grid-cols-4">
         {cells.map((cell, i) => (
-          // Staggered per cell, so the row reveals in sequence. `animate-none`
-          // under reduced motion leaves the tile in its resting state rather
-          // than hiding it, since the animation is what makes it visible.
+          // Staggered per cell, so the row turns over one tile at a time.
           <div
             key={cell.key}
-            className="tile-flip motion-reduce:animate-none"
-            style={{ animationDelay: `${i * 70}ms` }}
+            className="tile-flip relative motion-reduce:animate-none"
+            style={{ animationDelay: `${i * 160}ms` }}
           >
+            {/*
+              The blank face, covering the result until the tile is edge-on.
+              It is hidden from assistive tech and from pointers, so the real
+              cell underneath stays reachable, and it is dropped entirely under
+              reduced motion rather than being left stuck over the result.
+            */}
+            <div
+              aria-hidden
+              className="tile-face pointer-events-none absolute inset-0 z-10 rounded-2xl
+                         border-2 border-edge bg-canvas-deep motion-reduce:hidden"
+              style={{ animationDelay: `${i * 160}ms` }}
+            />
           <CellBox
             cell={cell}
             badge={
