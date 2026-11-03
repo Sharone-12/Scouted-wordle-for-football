@@ -18,7 +18,7 @@ import { GuessRow } from "@/components/guess-row";
 import { SaveStreakDialog } from "@/components/save-streak-dialog";
 import { HowToPlay } from "@/components/how-to-play";
 import { MAX_GUESSES, type Cell, type GuessOption, type Mode } from "@/lib/game";
-import { SILVER } from "@/lib/utils";
+import { postJson, SILVER } from "@/lib/utils";
 import { playerId } from "@/lib/identity";
 import {
   EMPTY,
@@ -33,6 +33,15 @@ const MODES: { id: Mode; label: string; icon: typeof CalendarDays }[] = [
   { id: "daily", label: "Daily", icon: CalendarDays },
   { id: "unlimited", label: "Unlimited", icon: InfinityIcon },
 ];
+
+/** What `/api/runs/[id]` sends back; fields vary by action. */
+type RunReply = {
+  cells?: Cell[];
+  answer?: string | null;
+  solved?: boolean;
+  over?: boolean;
+  streak?: number;
+};
 
 export function Game({
   players,
@@ -83,6 +92,10 @@ export function Game({
   });
   const [runEnded, setRunEnded] = useState(false);
   const [runBusy, setRunBusy] = useState(false);
+  // A guess is only a guess once the server has judged it. These two carry
+  // that wait, and the failure that ends it, to the screen.
+  const [judging, setJudging] = useState(false);
+  const [guessError, setGuessError] = useState<string | null>(null);
 
   const resetRound = useCallback(() => {
     setCells((c) => ({ ...c, unlimited: {} }));
@@ -100,18 +113,13 @@ export function Game({
    * cannot change the outcome, so this is safe to call on mount.
    */
   const judgeDaily = useCallback(async (ids: number[], gaveUp = false) => {
-    const res = await fetch("/api/daily", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ guessIds: ids, gaveUp }),
-    });
-    if (!res.ok) return null;
-    const body = (await res.json()) as {
+    const body = await postJson<{
       cells: Record<number, Cell[]>;
       solvedId: number | null;
       over: boolean;
       answer: string | null;
-    };
+    }>("/api/daily", { guessIds: ids, gaveUp });
+    if (!body) return null;
     setCells((c) => ({ ...c, daily: body.cells }));
     setSolvedId((sv) => ({ ...sv, daily: body.solvedId }));
     setReveal((r) => ({ ...r, daily: body.answer }));
@@ -125,20 +133,23 @@ export function Game({
       .filter((p): p is GuessOption => !!p);
     if (saved.length) {
       setBoards((b) => ({ ...b, daily: saved }));
-      void judgeDaily(saved.map((p) => p.id));
+      setJudging(true);
+      void judgeDaily(saved.map((p) => p.id)).then((body) => {
+        setJudging(false);
+        // The rows stay — they are really guessed — but without the verdict
+        // they are blank, so say why instead of leaving empty tiles.
+        if (!body) setGuessError("Couldn't load your results. Reconnect and reload.");
+      });
     }
   }, [puzzleNumber, byId, judgeDaily]);
 
   const startRun = useCallback(async () => {
     setRunBusy(true);
-    const res = await fetch("/api/runs", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ playerId: playerId() }),
+    const body = await postJson<{ runId: string }>("/api/runs", {
+      playerId: playerId(),
     });
     setRunBusy(false);
-    if (!res.ok) return;
-    const body = await res.json();
+    if (!body) return;
     setRunId(body.runId);
     setRunEnded(false);
     setStreak(0);
@@ -148,12 +159,11 @@ export function Game({
   const runAction = useCallback(
     async (action: string, extra: Record<string, unknown> = {}) => {
       if (!runId) return null;
-      const res = await fetch(`/api/runs/${runId}`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action, playerId: playerId(), ...extra }),
+      return postJson<RunReply>(`/api/runs/${runId}`, {
+        action,
+        playerId: playerId(),
+        ...extra,
       });
-      return res.ok ? await res.json() : null;
     },
     [runId],
   );
@@ -243,7 +253,8 @@ export function Game({
     }
     const body = await runAction("give-up");
     setRunEnded(true);
-    if (body?.answer) setReveal((r) => ({ ...r, unlimited: body.answer }));
+    const revealed = body?.answer ?? null;
+    if (revealed) setReveal((r) => ({ ...r, unlimited: revealed }));
     if (streak > 0) {
       setLostStreak(streak);
       setSavePrompt(streak);
@@ -257,15 +268,31 @@ export function Game({
     if (mode === "unlimited") {
       if (!runId) return;
       setBoards((b) => ({ ...b, unlimited: [...b.unlimited, player] }));
+      setJudging(true);
+      setGuessError(null);
       const body = await runAction("guess", { guessId: player.id });
-      if (!body) return;
-      setCells((c) => ({ ...c, unlimited: { ...c.unlimited, [player.id]: body.cells } }));
-      if (body.answer) setReveal((r) => ({ ...r, unlimited: body.answer }));
+      setJudging(false);
+      // An unjudged guess has no verdict to show and did not reach the run,
+      // so it comes back off the board rather than sitting there blank and
+      // counting against the ten.
+      if (!body) {
+        setBoards((b) => ({
+          ...b,
+          unlimited: b.unlimited.filter((g) => g.id !== player.id),
+        }));
+        setGuessError("Couldn't reach the server — that guess didn't count.");
+        return;
+      }
+      const verdict = body.cells ?? [];
+      const answer = body.answer ?? null;
+      const nextStreak = body.streak ?? 0;
+      setCells((c) => ({ ...c, unlimited: { ...c.unlimited, [player.id]: verdict } }));
+      if (answer) setReveal((r) => ({ ...r, unlimited: answer }));
       if (body.solved) {
         setSolvedId((sv) => ({ ...sv, unlimited: player.id }));
         setLostStreak(null);
-        setStreak(body.streak);
-        setBestStreak((b) => Math.max(b, body.streak));
+        setStreak(nextStreak);
+        setBestStreak((b) => Math.max(b, nextStreak));
       } else if (body.over) {
         setRunEnded(true);
         if (streak > 0) {
@@ -283,7 +310,16 @@ export function Game({
     // Written before the verdict arrives, so a reload mid-request still finds
     // the guess; the colours come back from the server on mount.
     saveBoard(puzzleNumber, ids);
-    await judgeDaily(ids);
+    setJudging(true);
+    setGuessError(null);
+    const body = await judgeDaily(ids);
+    setJudging(false);
+    if (!body) {
+      const kept = guesses.map((p) => p.id);
+      setBoards((b) => ({ ...b, daily: guesses }));
+      saveBoard(puzzleNumber, kept);
+      setGuessError("Couldn't reach the server — that guess didn't count.");
+    }
   }
 
   return (
@@ -415,6 +451,12 @@ export function Game({
             flight, so a failed start stops the spinner instead of leaving it
             turning on a screen that is never going to fill. */}
         {runBusy && <Loading label="Starting a run…" className="mt-3" />}
+        {judging && <Loading label="Checking that guess…" className="mt-3" />}
+        {guessError && !judging && (
+          <p role="alert" className="mt-3 text-sm font-bold text-brand-deep">
+            {guessError}
+          </p>
+        )}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2" aria-live="polite">
           {over ? (
             <div className="flex flex-wrap items-center gap-2">

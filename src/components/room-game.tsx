@@ -7,7 +7,7 @@ import { GuessInput } from "@/components/guess-input";
 import { GuessRow } from "@/components/guess-row";
 import { Loading } from "@/components/loading";
 import { compare, isWin, MAX_GUESSES, type GuessOption, type Player } from "@/lib/game";
-import { SILVER } from "@/lib/utils";
+import { postJson, SILVER } from "@/lib/utils";
 import { playerId } from "@/lib/identity";
 import {
   roundOver,
@@ -34,7 +34,14 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
   useEffect(() => setMe(playerId()), []);
 
   const refresh = useCallback(async () => {
-    const res = await fetch(`/api/rooms/${code}`, { cache: "no-store" });
+    // Offline, `fetch` rejects rather than answering, and an unhandled
+    // rejection would leave the room loading with nothing said.
+    let res: Response;
+    try {
+      res = await fetch(`/api/rooms/${code}`, { cache: "no-store" });
+    } catch {
+      return setError("Can't reach the room. Check your connection.");
+    }
     if (!res.ok) return setError("That room no longer exists");
     setState(await res.json());
   }, [code]);
@@ -63,11 +70,7 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
 
   const post = useCallback(
     async (body: Record<string, unknown>) => {
-      await fetch(`/api/rooms/${code}`, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ playerId: playerId(), ...body }),
-      });
+      await postJson(`/api/rooms/${code}`, { playerId: playerId(), ...body });
     },
     [code],
   );

@@ -11,3 +11,24 @@ export { cn } from "cn"
 export const SILVER =
   "bg-[linear-gradient(162deg,#ffffff_0%,var(--color-ink)_42%,#ccd3e6_100%)] " +
   "shadow-[inset_0_1px_0_rgb(255_255_255/0.85),0_0_10px_rgb(238_241_248/0.22)]";
+
+/**
+ * `fetch` that answers `null` instead of throwing.
+ *
+ * Offline, `fetch` rejects rather than returning a failed response, so every
+ * line after the `await` — clearing a spinner, rolling a guess back — was
+ * never reached and the page sat there loading for good. A refused request
+ * and a request that never left are the same thing to the caller: no body.
+ */
+export async function postJson<T>(url: string, body: unknown): Promise<T | null> {
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    return res.ok ? ((await res.json()) as T) : null;
+  } catch {
+    return null;
+  }
+}
