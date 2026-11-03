@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Copy, Crown, Timer } from "lucide-react";
 import { GuessInput } from "@/components/guess-input";
 import { GuessRow } from "@/components/guess-row";
+import { Loading } from "@/components/loading";
 import { compare, isWin, MAX_GUESSES, type GuessOption, type Player } from "@/lib/game";
 import { SILVER } from "@/lib/utils";
 import { playerId } from "@/lib/identity";
@@ -128,8 +129,8 @@ export function RoomGame({ code, players: allPlayers }: { code: string; players:
   }
   if (!room) {
     return (
-      <main className="mx-auto max-w-3xl px-4 py-14 text-sm font-medium text-ink-soft">
-        Loading room…
+      <main className="mx-auto max-w-3xl px-4 py-14">
+        <Loading label="Loading room…" />
       </main>
     );
   }

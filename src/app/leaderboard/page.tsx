@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { Ball } from "@/components/ball";
+import { Loading } from "@/components/loading";
 import { SubmitStreak } from "@/components/submit-streak";
 import { serviceClient } from "@/lib/supabase-server";
 
@@ -63,7 +64,7 @@ export default function LeaderboardPage() {
           do, so it streams in behind this boundary. */}
       <Suspense
         fallback={
-          <p className="mt-8 text-sm font-medium text-ink-soft">Loading the table…</p>
+          <Loading label="Loading the table…" className="mt-8" />
         }
       >
         <Board />

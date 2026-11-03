@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { Ball } from "@/components/ball";
 import { GuessInput } from "@/components/guess-input";
+import { Loading } from "@/components/loading";
 import { GuessRow } from "@/components/guess-row";
 import { SaveStreakDialog } from "@/components/save-streak-dialog";
 import { HowToPlay } from "@/components/how-to-play";
@@ -410,6 +411,10 @@ export function Game({
           disabled={over || (mode === "unlimited" && (!runId || runBusy))}
           onGuess={handleGuess}
         />
+        {/* `runBusy`, not `!runId`: it is true only while /api/runs is in
+            flight, so a failed start stops the spinner instead of leaving it
+            turning on a screen that is never going to fill. */}
+        {runBusy && <Loading label="Starting a run…" className="mt-3" />}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2" aria-live="polite">
           {over ? (
             <div className="flex flex-wrap items-center gap-2">

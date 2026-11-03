@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import data from "@/data/game-players.json";
 import { RoomGame } from "@/components/room-game";
+import { Loading } from "@/components/loading";
 import type { Player } from "@/lib/game";
 
 const players = data as Player[];
@@ -18,8 +19,8 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
   return (
     <Suspense
       fallback={
-        <main className="mx-auto max-w-3xl px-4 py-14 text-sm font-medium text-ink-soft">
-          Loading room…
+        <main className="mx-auto max-w-3xl px-4 py-14">
+          <Loading label="Loading room…" />
         </main>
       }
     >

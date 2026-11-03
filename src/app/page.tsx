@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { Ball } from "@/components/ball";
+import { Loading } from "@/components/loading";
 import { Game } from "@/components/game";
 import data from "@/data/game-players.json";
 import { puzzleNumber, toOption, type Player } from "@/lib/game";
@@ -47,7 +48,7 @@ export default function Home() {
               Sc<Ball />uted<span className="text-brand">.</span>
             </span>
           </h1>
-          <div className="mt-8 h-14 animate-pulse rounded-2xl border-2 border-edge bg-surface/60" />
+          <Loading label="Loading today's puzzle…" className="mt-10" />
         </main>
       }
     >
