@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useRef, useState } from "react";
 import { search, roleLabel, type GuessOption } from "@/lib/game";
 
@@ -89,17 +88,7 @@ export function GuessInput({ players, guessed, disabled, onGuess }: Props) {
                 className={`flex w-full items-baseline justify-between gap-3 px-5 py-3 text-left
                             ${i === active ? "bg-brand text-white" : "bg-surface"}`}
               >
-                <span className="flex items-center gap-2 font-bold">
-                  <Image
-                    src={`/clubs/${p.teamId}.png`}
-                    alt=""
-                    width={18}
-                    height={18}
-                    className="size-[18px] shrink-0 object-contain"
-                    unoptimized
-                  />
-                  {p.name}
-                </span>
+                <span className="font-bold">{p.name}</span>
                 <span className={`text-xs ${i === active ? "text-white/80" : "text-ink-soft"}`}>
                   {p.team} · {roleLabel(p.role)}
                 </span>

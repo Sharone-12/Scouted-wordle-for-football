@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { ArrowDown, ArrowUp, Check, ChevronRight, Contrast, Eye, X } from "lucide-react";
 import { type Cell, type GuessOption } from "@/lib/game";
 
@@ -48,12 +47,10 @@ function CellBody({
   cell,
   iconClass = "",
   affordance,
-  badge,
 }: {
   cell: Cell;
   iconClass?: string;
   affordance?: React.ReactNode;
-  badge?: string;
 }) {
   return (
     <>
@@ -67,18 +64,6 @@ function CellBody({
         </span>
       </div>
       <div className="flex items-center gap-1.5">
-        {badge && (
-          // Badges are self-hosted, so a missing one is a bug worth seeing
-          // rather than hiding behind a placeholder.
-          <Image
-            src={badge}
-            alt=""
-            width={18}
-            height={18}
-            className="size-[18px] shrink-0 object-contain"
-            unoptimized
-          />
-        )}
         <span className="truncate text-[15px] font-bold tabular-nums">{cell.value}</span>
       </div>
       <span className="sr-only">{hint(cell)}</span>
@@ -92,22 +77,6 @@ function UclCell({ cell }: { cell: Cell }) {
       className={`relative overflow-hidden rounded-2xl border-2 bg-[#0a1046] ${UCL_TONE[cell.state]}`}
       title={`${cell.label}: ${cell.value} — ${hint(cell)}`}
     >
-      {/*
-        The artwork is pinned to the right half at its own scale rather than
-        stretched across the cell: `bg-cover` on a 3:1 banner inside a 2.3:1
-        cell crops straight to the trophy, which then sits under the label and
-        the number and makes both unreadable.
-      */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 w-3/5 bg-[url('/ucl.png')]
-                   bg-cover bg-right bg-no-repeat"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a1046]
-                   via-[#0a1046] via-40% to-[#0a1046]/10"
-      />
       <div className="relative px-3 py-2.5">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-bold uppercase tracking-[0.08em] opacity-80">
@@ -122,7 +91,7 @@ function UclCell({ cell }: { cell: Cell }) {
   );
 }
 
-function CellBox({ cell, badge }: { cell: Cell; badge?: string }) {
+function CellBox({ cell }: { cell: Cell }) {
   if (cell.key === "ucl") return <UclCell cell={cell} />;
 
   const className = `rounded-2xl border-2 px-3 py-2.5 ${TONE[cell.state]}`;
@@ -142,7 +111,6 @@ function CellBox({ cell, badge }: { cell: Cell; badge?: string }) {
         >
           <CellBody
             cell={cell}
-            badge={badge}
             affordance={
               <ChevronRight
                 aria-hidden
@@ -161,7 +129,7 @@ function CellBox({ cell, badge }: { cell: Cell; badge?: string }) {
 
   return (
     <div className={className} title={`${cell.label}: ${cell.value} — ${hint(cell)}`}>
-      <CellBody cell={cell} badge={badge} />
+      <CellBody cell={cell} />
     </div>
   );
 }
@@ -207,14 +175,6 @@ export function GuessRow({
         >
           {isAnswer ? <Eye aria-hidden className="size-3.5" strokeWidth={2.5} /> : index + 1}
         </span>
-        <Image
-          src={`/clubs/${guess.teamId}.png`}
-          alt=""
-          width={26}
-          height={26}
-          className="size-[26px] shrink-0 object-contain"
-          unoptimized
-        />
         <div>
           {isAnswer && (
             <span className="block text-[10px] font-bold uppercase tracking-wider text-brand">
@@ -254,16 +214,7 @@ export function GuessRow({
                          border-2 border-edge bg-canvas-deep motion-reduce:hidden"
               style={{ animationDelay: `${i * 160}ms` }}
             />
-          <CellBox
-            cell={cell}
-            badge={
-              cell.key === "team"
-                ? `/clubs/${guess.teamId}.png`
-                : cell.key === "league"
-                  ? `/leagues/${guess.leagueId}.png`
-                  : undefined
-            }
-          />
+          <CellBox cell={cell} />
           </div>
         ))}
       </div>

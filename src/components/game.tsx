@@ -335,7 +335,7 @@ export function Game({
             </span>
           </h1>
           <p className="mt-1 text-sm font-bold uppercase tracking-[0.18em] text-ink-soft">
-            Wordle for football
+            The daily football guessing game
           </p>
         </div>
 
